@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Bits & Bytes</title>
+
+    <!--Bootstrap CSS-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!--BS ICONS CSS-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!--Font Awesome-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!--Custom CSS-->
+    <link rel="stylesheet" href="assets/css/style.css">
+
+    <style>
+        .overlay {
+            background-color: rgba(235, 244, 255, 0.95);
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .mission-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #0d6efd;
+            height: 100%;
+        }
+        
+        .mission-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .team-card {
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border-top: 4px solid #0d6efd;
+        }
+        
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .team-card img {
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .team-card:hover img {
+            transform: scale(1.05);
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background-color: #0d6efd;
+        }
+        
+        .feature-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            margin-right: 1rem;
+        }
+        
+        .info-banner {
+            background-color: #e9f2ff;
+            border-left: 4px solid #0d6efd;
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!--Navigation Bar-->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
+        <div class="container">
+            <div class="d-flex align-items-center">
+                <a href="assets/img/BPOLD.jpg" target="_blank">
+                    <img src="assets/img/BPOLD.jpg" alt="Logo" style="height: 40px;" class="me-2 img-fluid">
+                </a>
+                <a class="navbar-brand mb-0 h1">Bits & Bytes</a>
+            </div>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="dashboard_customer.php">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="products.php">Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="AboutUS.html">About Us</a></li>
+                    <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
+                    <li class="nav-item"><a class="btn btn-outline-primary me-2" href="reservations.php"><i class="bi bi-cart"></i> Cart</a></li>
+                    <li class="nav-item"><a class="btn btn-outline-danger" href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!--Main Content-->
+    <div class="container">
+        <div class="row py-4">
+            <div class="col-12 text-center">
+                <h1 class="fw-bold display-5">About Us</h1>
+                <p class="lead">Empowering the Bicolano community with trusted and affordable pre-owned laptops.</p>
+            </div>
+        </div>
+        
+        <!--Info Banner-->
+        <div class="info-banner">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <i class="bi bi-info-circle-fill fs-1 text-primary"></i>
+                </div>
+                <div class="col">
+                    <h4 class="mb-0">Bicol Pre-Owned Laptop Depot</h4>
+                    <p class="mb-0">Your trusted source for quality pre-owned laptops in the Bicol region since 2022.</p>
+                </div>
+            </div>
+        </div>
+
+        <!--Mission & Values Section-->
+        <div class="overlay">
+            <div class="row mb-4">
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <div class="card mission-card">
+                        <div class="card-body">
+                            <h2 class="section-title fw-semibold">Our Mission</h2>
+                            <p>To deliver high-quality pre-owned laptops with exceptional customer service, ensuring every Filipino has access to reliable and affordable technology. We believe technology should be accessible to everyone regardless of budget constraints.</p>
+                            <div class="text-end">
+                                <i class="bi bi-target text-primary fs-1 opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mission-card">
+                        <div class="card-body">
+                            <h2 class="section-title fw-semibold">Why Choose Us?</h2>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="feature-icon">
+                                    <i class="bi bi-check2-circle"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">Thoroughly tested and certified devices</h5>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="feature-icon">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">Competitive prices for students and professionals</h5>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="feature-icon">
+                                    <i class="bi bi-tree"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">Sustainability-focused and eco-friendly practices</h5>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <i class="bi bi-star text-primary fs-1 opacity-25"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--Team Section-->
+        <div class="overlay">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold mb-4">Meet the Team</h2>
+                <p class="lead">Dedicated individuals behind this platform</p>
+            </div>
+            
+            <div class="row justify-content-center g-4">
+                <div class="col-sm-6 col-md-4">
+                    <div class="card team-card h-100 shadow">
+                        <div class="overflow-hidden">
+                            <img src="assets/img/Castillo.png" class="card-img-top" alt="Castillo">
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-0">Castillo, Roi Martin A.</h5>
+                            <p class="card-text text-muted">Front-End & Back-End Coder</p>
+                            <div class="pt-2">
+                                <span class="badge bg-primary rounded-pill">HTML/CSS</span>
+                                <span class="badge bg-secondary rounded-pill">PHP</span>
+                                <span class="badge bg-info text-dark rounded-pill">SQL</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent text-center border-0">
+                            <div class="d-flex justify-content-center">
+                                <a href="#" class="btn btn-sm btn-outline-primary rounded-circle mx-1"><i class="bi bi-linkedin"></i></a>
+                                <a href="https://github.com/ComradeLamp" class="btn btn-sm btn-outline-primary rounded-circle mx-1"><i class="bi bi-github"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-primary rounded-circle mx-1"><i class="bi bi-envelope"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6 col-md-4">
+                    <div class="card team-card h-100 shadow">
+                        <div class="overflow-hidden">
+                            <img src="assets/img/Ligaya.jpg" class="card-img-top" alt="Ligaya">
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-0">Ligaya, Karen Joy A.</h5>
+                            <p class="card-text text-muted">Front-End & Back-End Coder</p>
+                            <div class="pt-2">
+                                <span class="badge bg-primary rounded-pill">HTML/CSS</span>
+                                <span class="badge bg-secondary rounded-pill">PHP</span>
+                                <span class="badge bg-info text-dark rounded-pill">SQL</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent text-center border-0">
+                            <div class="d-flex justify-content-center">
+                                <a href="#" class="btn btn-sm btn-outline-primary rounded-circle mx-1"><i class="bi bi-linkedin"></i></a>
+                                <a href="https://github.com/itsherkj" class="btn btn-sm btn-outline-primary rounded-circle mx-1"><i class="bi bi-github"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-primary rounded-circle mx-1"><i class="bi bi-envelope"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-sm-6 col-md-4">
+                    <div class="card team-card h-100 shadow">
+                        <div class="overflow-hidden">
+                            <img src="assets/img/Mortel.png" class="card-img-top" alt="Mortel">
+                        </div>
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-0">Mortel, Aris S.</h5>
+                            <p class="card-text text-muted">Front-End & Back-End Coder</p>
+                            <div class="pt-2">
+                                <span class="badge bg-primary rounded-pill">HTML/CSS</span>
+                                <span class="badge bg-secondary rounded-pill">PHP</span>
+                                <span class="badge bg-info text-dark rounded-pill">SQL</span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent text-center border-0">
+                            <div class="d-flex justify-content-center">
+                                <a href="#" class="btn btn-sm btn-outline-primary rounded-circle mx-1"><i class="bi bi-linkedin"></i></a>
+                                <a href="https://github.com/arrris" class="btn btn-sm btn-outline-primary rounded-circle mx-1"><i class="bi bi-github"></i></a>
+                                <a href="#" class="btn btn-sm btn-outline-primary rounded-circle mx-1"><i class="bi bi-envelope"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!--Call to Action-->
+        <div class="overlay text-center">
+            <i class="bi bi-laptop fs-1 text-primary mb-3"></i>
+            <h2 class="fw-bold mb-3">Ready to find your next laptop?</h2>
+            <p class="lead mb-4">Browse our collection of thoroughly tested and certified pre-owned laptops.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="products.php" class="btn btn-primary btn-lg">View Products</a>
+                <a href="contact.php" class="btn btn-outline-primary btn-lg">Contact Us</a>
+            </div>
+        </div>
+    </div>
+
+    <!--Footer-->
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            <p>&copy; 2025 Bicol Pro-Owned Laptop Depot. All rights reserved.</p>
+            <p>
+                <a href="privacy.html" class="text-white">Privacy Policy</a> |
+                <a href="terms.html" class="text-white">Terms of Service</a>
+            </p>
+        </div>
+    </footer>
+
+    <!--Bootstrap JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!--Custom JS-->
+    <script src="js/script.js"></script>
+</body>
+
+</html>

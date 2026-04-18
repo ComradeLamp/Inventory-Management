@@ -1,0 +1,145 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body, html {
+    height: 100%;
+    font-family: Arial, sans-serif;
+  }
+  
+  .container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  /* Sidebar */
+  .sidebar {
+    width: 220px;
+    background-color: #02112b;
+    color: white;
+    padding: 20px;
+  }
+  
+  .logo {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-bottom: 30px;
+  }
+  
+  .nav {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: white;
+    border-radius: 8px;
+    transition: background 0.3s;
+  }
+  
+  .nav-item span {
+    margin-right: 10px;
+  }
+  
+  .nav-item:hover,
+  .nav-item.active {
+    background-color: #1d4ed8;
+  }
+  
+  /* Main Content */
+  .main {
+    flex: 1;
+    background-color: #f5f7fa;
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+  
+  .header input {
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  
+  .avatar {
+    margin-left: 10px;
+    font-size: 1.5em;
+  }
+  
+  .search-avatar {
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Cards */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+  
+  .card {
+    height: 130px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  .card.blue {
+    background-color: #5555ff;
+  }
+  
+  .card.red {
+    background-color: #f43f5e;
+  }
+  
+  .card.yellow {
+    background-color: #facc15;
+  }
+  
+  /* Bottom Panel */
+  .bottom-panel {
+    flex: 1;
+    background-color: #cfe1ff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  .logout-form {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .logout-form button {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    width: 100%;
+    border-radius: 8px;
+    transition: background 0.3s;
+    color: white;
+  }
+  
+  .logout-form button:hover {
+    background-color: #1d4ed8;
+  }
+  
+  .logout-form span {
+    margin-right: 10px;
+  }
+    
