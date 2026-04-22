@@ -200,7 +200,7 @@ if ($columnResult) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Admin - Bits & Bytes</title>
+    <title>Contact Admin - OptimaFlow</title>
     
     <!--Bootstrap CSS-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -257,7 +257,7 @@ if ($columnResult) {
                 <a href="assets/img/BPOLD.jpg" target="_blank">
                     <img src="assets/img/BPOLD.jpg" alt="Logo" style="height: 40px;" class="me-2 img-fluid">
                 </a>
-                <a class="navbar-brand mb-0 h1">Bits & Bytes</a>
+                <a class="navbar-brand mb-0 h1">OptimaFlow</a>
             </div>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -344,7 +344,7 @@ if ($columnResult) {
                         <h4 class="mb-0">Contact Options</h4>
                     </div>
                     <div class="card-body">
-                        <p><i class="bi bi-envelope-fill me-2"></i> Email: <a href="mailto:support@bitsandbytes.com">support@bitsandbytes.com</a></p>
+                        <p><i class="bi bi-envelope-fill me-2"></i> Email: <a href="mailto:support@optimaflow.com">support@optimaflow.com</a></p>
                         <p><i class="bi bi-telephone-fill me-2"></i> Phone: +63 912 345 6789</p>
                         <p class="mb-0"><i class="bi bi-clock-fill me-2"></i> Response Time: Within 24-48 hours</p>
                     </div>
@@ -382,7 +382,7 @@ if ($columnResult) {
     <!--Footer-->
     <footer class="bg-dark text-white py-4">
         <div class="container text-center">
-            <p>&copy; 2025 Bits & Bytes. All rights reserved.</p>
+            <p>&copy; 2025 OptimaFlow. All rights reserved.</p>
             <p>
                 <a href="privacy.html" class="text-white">Privacy Policy</a> |
                 <a href="terms.html" class="text-white">Terms of Service</a>

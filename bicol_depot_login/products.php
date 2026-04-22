@@ -19,7 +19,7 @@ $orderedCategories = ['Laptop', 'GPU', 'CPU', 'SSD', 'Motherboard', 'PC Case'];
 <html lang="en">
 
 <head>
-    <title>Products - Bits & Bytes</title>
+    <title>Products - OptimaFlow</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -54,7 +54,7 @@ $orderedCategories = ['Laptop', 'GPU', 'CPU', 'SSD', 'Motherboard', 'PC Case'];
                 <a href="assets/img/BPOLD.jpg" target="_blank">
                     <img src="assets/img/BPOLD.jpg" alt="Logo" style="height: 40px;" class="me-2 img-fluid">
                 </a>
-                <a class="navbar-brand mb-0 h1">Bits & Bytes</a>
+                <a class="navbar-brand mb-0 h1">OptimaFlow</a>
             </div>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
