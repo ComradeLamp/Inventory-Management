@@ -85,10 +85,10 @@ $paginatedUsers = $stmt->get_result();
     <title>User Management - OptimaFlow</title>
 
     <!--Font Icons-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
     <!--Users.css-->
-    <link rel="stylesheet" href="assets/css/admin/users.css" />
+    <link rel="stylesheet" href="assets/css/admin/users.css"/>
 </head>
 <body>
     <div class="container">
