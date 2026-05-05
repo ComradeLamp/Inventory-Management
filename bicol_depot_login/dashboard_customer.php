@@ -478,7 +478,8 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
         <div class="container hero-content text-center">
             <h1 class="display-4 fw-bold text-white mb-3">Welcome to Bits & Bytes</h1>
             <p class="lead text-white mb-4">Quality & Affordable Pre-Owned Laptops from Japan & US</p>
-            <a href="/bicol_depot_login/products.php" class="btn btn-light btn-lg btn-hero">
+            <a href="products.php" class="btn btn-light btn-lg btn-hero">
+           <!-- <a href="/bicol_depot_login/products.php" class="btn btn-light btn-lg btn-hero"> -->
                 <i class="bi bi-laptop me-2"></i>Shop Now
             </a>
         </div>
@@ -524,7 +525,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                         <div class="card-body">
                             <h5 class="card-title">Laptops</h5>
                             <p class="card-text">Explore our range of quality pre-owned laptops sourced from Japan and US.</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary">
+                            <a href="products.php" class="btn btn-primary">
                                 <i class="bi bi-arrow-right-circle me-1"></i> Explore
                             </a>
                         </div>
@@ -539,7 +540,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                         <div class="card-body">
                             <h5 class="card-title">Motherboard</h5>
                             <p class="card-text">High-quality motherboards for your custom PC builds and upgrades.</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary">
+                            <a href="products.php" class="btn btn-primary">
                                 <i class="bi bi-arrow-right-circle me-1"></i> Explore
                             </a>
                         </div>
@@ -554,7 +555,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                         <div class="card-body">
                             <h5 class="card-title">Processor</h5>
                             <p class="card-text">Power your system with our selection of reliable processors.</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary">
+                            <a href="products.php" class="btn btn-primary">
                                 <i class="bi bi-arrow-right-circle me-1"></i> Explore
                             </a>
                         </div>
@@ -569,7 +570,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                         <div class="card-body">
                             <h5 class="card-title">Graphics Card</h5>
                             <p class="card-text">Enhance your gaming and visual experience with our graphics cards.</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary">
+                            <a href="products.php" class="btn btn-primary">
                                 <i class="bi bi-arrow-right-circle me-1"></i> Explore
                             </a>
                         </div>
@@ -584,7 +585,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                         <div class="card-body">
                             <h5 class="card-title">SSD</h5>
                             <p class="card-text">Boost your system's performance with our fast and reliable SSDs.</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary">
+                            <a href="products.php" class="btn btn-primary">
                                 <i class="bi bi-arrow-right-circle me-1"></i> Explore
                             </a>
                         </div>
@@ -599,7 +600,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                         <div class="card-body">
                             <h5 class="card-title">PC Case</h5>
                             <p class="card-text">Stylish and functional PC cases to house your components.</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary">
+                            <a href="products.php" class="btn btn-primary">
                                 <i class="bi bi-arrow-right-circle me-1"></i> Explore
                             </a>
                         </div>
@@ -638,7 +639,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                             <h5 class="card-title">ASUS ROG Strix B550-F</h5>
                             <p class="price">₱189.99</p>
                             <p class="card-text flex-grow-1">For AMD Ryzen builds</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary mt-auto">
+                            <a href="products.php" class="btn btn-primary mt-auto">
                                 <i class="bi bi-cart-plus me-1"></i> View Product
                             </a>
                         </div>
@@ -654,7 +655,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                             <h5 class="card-title">NVIDIA GeForce RTX 3060</h5>
                             <p class="price">₱379.99</p>
                             <p class="card-text flex-grow-1">Great performance for 1080p and 1440p gaming</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary mt-auto">
+                            <a href="products.php" class="btn btn-primary mt-auto">
                                 <i class="bi bi-cart-plus me-1"></i> View Product
                             </a>
                         </div>
@@ -670,7 +671,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                             <h5 class="card-title">Corsair 4000D</h5>
                             <p class="price">₱94.99</p>
                             <p class="card-text flex-grow-1">Great airflow and cable management</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary mt-auto">
+                            <a href="products.php" class="btn btn-primary mt-auto">
                                 <i class="bi bi-cart-plus me-1"></i> View Product
                             </a>
                         </div>
@@ -686,7 +687,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                             <h5 class="card-title">Samsung 970 EVO Plus 1TB</h5>
                             <p class="price">₱129.99</p>
                             <p class="card-text flex-grow-1">High-speed NVMe storage</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary mt-auto">
+                            <a href="products.php" class="btn btn-primary mt-auto">
                                 <i class="bi bi-cart-plus me-1"></i> View Product
                             </a>
                         </div>
@@ -702,7 +703,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                             <h5 class="card-title">HP Spectre x360</h5>
                             <p class="price">₱45,000</p>
                             <p class="card-text flex-grow-1">Intel Core i7, 16GB RAM, 1TB SSD</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary mt-auto">
+                            <a href="products.php" class="btn btn-primary mt-auto">
                                 <i class="bi bi-cart-plus me-1"></i> View Product
                             </a>
                         </div>
@@ -718,7 +719,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                             <h5 class="card-title">Asus ROG Zephyrus G14</h5>
                             <p class="price">₱1399.99</p>
                             <p class="card-text flex-grow-1">Intel Core i7, 16GB RAM, 1TB SSD</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary mt-auto">
+                            <a href="products.php" class="btn btn-primary mt-auto">
                                 <i class="bi bi-cart-plus me-1"></i> View Product
                             </a>
                         </div>
@@ -734,7 +735,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                             <h5 class="card-title">Lenovo ThinkPad T14</h5>
                             <p class="price">₱999.99</p>
                             <p class="card-text flex-grow-1">AMD Ryzen 7, 16GB RAM, 512GB SSD</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary mt-auto">
+                            <a href="products.php" class="btn btn-primary mt-auto">
                                 <i class="bi bi-cart-plus me-1"></i> View Product
                             </a>
                         </div>
@@ -750,7 +751,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                             <h5 class="card-title">Intel Core i7-12700K</h5>
                             <p class="price">₱399.99</p>
                             <p class="card-text flex-grow-1">Intel Core i7 12th Gen</p>
-                            <a href="/bicol_depot_login/products.php" class="btn btn-primary mt-auto">
+                            <a href="products.php" class="btn btn-primary mt-auto">
                                 <i class="bi bi-cart-plus me-1"></i> View Product
                             </a>
                         </div>
