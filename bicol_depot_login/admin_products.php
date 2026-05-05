@@ -135,7 +135,7 @@ $orderedCategories = ['Laptop', 'GPU', 'CPU', 'SSD', 'Motherboard', 'PC Case'];
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Products - Bits & Bytes</title>
+    <title>Admin Products - OptimaFlow</title>
     <link rel="stylesheet" href="assets/css/admin_styles.css" />
     <style>
         /*Additional styles for the product page*/

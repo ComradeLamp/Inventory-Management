@@ -20,7 +20,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bits & Bytes - Dashboard</title>
+    <title>OptimaFlow - Dashboard</title>
 
     <!--Bootstrap CSS-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -439,7 +439,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                 <a href="assets/img/BPOLD.jpg" target="_blank">
                     <img src="assets/img/BPOLD.jpg" alt="Logo" style="height: 40px;" class="me-2 img-fluid">
                 </a>
-                <a class="navbar-brand mb-0 h1">Bits & Bytes</a>
+                <a class="navbar-brand mb-0 h1">OptimaFlow</a>
             </div>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -476,7 +476,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
     <!--Hero Section-->
     <header class="hero">
         <div class="container hero-content text-center">
-            <h1 class="display-4 fw-bold text-white mb-3">Welcome to Bits & Bytes</h1>
+            <h1 class="display-4 fw-bold text-white mb-3">Welcome to OptimaFlow</h1>
             <p class="lead text-white mb-4">Quality & Affordable Pre-Owned Laptops from Japan & US</p>
             <a href="products.php" class="btn btn-light btn-lg btn-hero">
            <!-- <a href="/bicol_depot_login/products.php" class="btn btn-light btn-lg btn-hero"> -->

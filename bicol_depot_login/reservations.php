@@ -32,7 +32,7 @@ if ($user_id) {
 <html lang="en">
 
 <head>
-    <title>My Reservations - Bits & Bytes</title>
+    <title>My Reservations - OptimaFlow</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -91,7 +91,7 @@ if ($user_id) {
                 <a href="assets/img/BPOLD.jpg" target="_blank">
                     <img src="assets/img/BPOLD.jpg" alt="Logo" style="height: 40px;" class="me-2 img-fluid">
                 </a>
-                <a class="navbar-brand mb-0 h1">Bits & Bytes</a>
+                <a class="navbar-brand mb-0 h1">OptimaFlow</a>
             </div>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"

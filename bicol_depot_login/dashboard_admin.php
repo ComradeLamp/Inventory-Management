@@ -31,7 +31,7 @@ $totalUsers = $totalUsersResult ? $totalUsersResult->fetch_assoc()['total'] : 0;
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard - Bits & Bytes</title>
+    <title>Admin Dashboard - OptimaFlow</title>
     <link rel="stylesheet" href="assets/css/admin_styles.css" />
     <style>
         /*Styles for Dashboard*/

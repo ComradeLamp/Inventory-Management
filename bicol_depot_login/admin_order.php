@@ -150,7 +150,7 @@ foreach ($statuses as $status) {
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Order Management - Bits & Bytes</title>
+    <title>Order Management - OptimaFlow</title>
     <link rel="stylesheet" href="assets/css/admin_styles.css" />
     <style>
         /* Additional styles for the orders page */
