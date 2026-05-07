@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 19, 2025 at 06:16 AM
+-- Generation Time: May 07, 2026 at 04:39 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -40,20 +40,9 @@ CREATE TABLE `messages` (
 --
 
 INSERT INTO `messages` (`id`, `user_id`, `subject`, `content`, `created_at`) VALUES
-(1, 21, 'qawer', 'adfgh', '2025-05-16 06:36:25'),
-(2, 21, 'sdfgsdfg', 'dffggfsa', '2025-05-16 06:36:39'),
-(3, 21, 'sdfgsdfg', 'dffggfsa', '2025-05-16 06:36:49'),
 (4, 2, 'gdhgsdjhsa', 'uyuyewuyurwe', '2025-05-16 06:37:27'),
-(5, 21, 'dsjhsg', 'hsjafjhhfjsh\\r\\n', '2025-05-16 06:38:19'),
 (6, 2, 'jhgsdgshf', 'mndsfhjgfdh\\r\\n', '2025-05-16 06:45:14'),
 (7, 18, 'Walang PC', 'sqfaf', '2025-05-18 02:05:09'),
-(8, 1, 'Test', 'message test directory', '2025-05-18 13:42:27'),
-(9, 1, 'Test', 'message test directory', '2025-05-18 13:43:15'),
-(10, 1, 'Walang PC', 'gesajhfvjasvfjasjkfjht test 2\\r\\n', '2025-05-18 13:43:23'),
-(11, 1, 'subject none', '12345678', '2025-05-18 13:44:08'),
-(12, 1, 'Walang PC', 'wala daw pc here', '2025-05-18 14:34:11'),
-(13, 1, 'Walang PC', 'test', '2025-05-19 00:57:46'),
-(14, 1, 'Walang PC', 'test2', '2025-05-19 01:02:56'),
 (15, 2, 'Walang PC', 'WLANG PC', '2025-05-19 02:31:35');
 
 -- --------------------------------------------------------
@@ -78,7 +67,7 @@ CREATE TABLE `products` (
 
 INSERT INTO `products` (`id`, `name`, `description`, `image`, `category`, `price`, `quantity`) VALUES
 (1, 'Lenovo ThinkPad T14', 'Business-class laptop', 'assets/img/LenovoThinkPadT14.jpg', 'Laptop', 999.99, 17),
-(3, 'HP Spectre x360', 'Convertible 2-in-1 laptop', 'assets/img/HPSpectrex360.jpg', 'Laptop', 1099.99, 9),
+(3, 'HP Spectre x360', 'Convertible 2-in-1 laptop', 'assets/img/HPSpectrex360.jpg', 'Laptop', 1099.99, 8),
 (4, 'Asus ROG Zephyrus G14', 'Gaming powerhouse laptop', 'assets/img/AsusROGZephyrusG14.jpg', 'Laptop', 1399.99, 8),
 (5, 'NVIDIA GeForce RTX 3060', 'Great performance for 1080p and 1440p gaming', 'assets/img/NVIDIAGeForceRTX3060.jpg', 'GPU', 379.99, 9),
 (6, 'AMD Radeon RX 6600', 'Mid-range AMD graphics card', 'assets/img/AMDRadeonRX6600.jpg', 'GPU', 329.99, 9),
@@ -101,7 +90,7 @@ INSERT INTO `products` (`id`, `name`, `description`, `image`, `category`, `price
 (24, 'Intel Core i9-12900K', 'Top-tier 12th gen Intel', 'assets/img/IntelCorei912900K.jpg', 'CPU', 599.99, 9),
 (25, 'AMD Ryzen 9 5900X', '12-core AMD monster', 'assets/img/AMDRyzen95900X.jpg', 'CPU', 549.99, 10),
 (29, 'Top 1', 'Top 1', NULL, 'GPU', 100.00, 4),
-(30, 'asdasdasda', 'asdasd', NULL, 'Laptop', 1.00, 1);
+(30, 'asdasdasda', 'asdasd', NULL, 'Laptop', 1.00, 2);
 
 -- --------------------------------------------------------
 
@@ -114,7 +103,7 @@ CREATE TABLE `reservations` (
   `user_id` int(11) DEFAULT NULL,
   `product_id` int(11) DEFAULT NULL,
   `quantity` int(11) DEFAULT NULL,
-  `status` enum('pending','confirmed','cancelled') DEFAULT 'pending',
+  `status` enum('pending','approved','fulfilled','cancelled') NOT NULL DEFAULT 'pending',
   `reserved_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -144,9 +133,11 @@ INSERT INTO `reservations` (`id`, `user_id`, `product_id`, `quantity`, `status`,
 (21, 18, 24, 1, 'pending', '2025-05-18 02:05:47'),
 (22, 18, 18, 1, 'pending', '2025-05-18 02:05:53'),
 (23, 2, 6, 1, 'pending', '2025-05-18 03:51:43'),
-(24, 1, 4, 1, 'pending', '2025-05-18 14:16:16'),
+(24, 1, 4, 1, 'cancelled', '2025-05-18 14:16:16'),
 (25, 1, 5, 1, 'pending', '2025-05-18 14:16:20'),
-(26, 2, 29, 2, 'pending', '2025-05-19 02:31:02');
+(26, 2, 29, 2, 'fulfilled', '2025-05-19 02:31:02'),
+(27, 27, 30, 1, 'cancelled', '2026-04-21 05:25:47'),
+(28, 27, 3, 1, 'pending', '2026-04-22 04:16:48');
 
 -- --------------------------------------------------------
 
@@ -170,14 +161,13 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `role`, `created_at`, `login_at`, `status`) VALUES
-(1, 'ComradeCom15', 'castilloroimartina@gmail.com', '$2y$10$zBchefJywa1uEKGFRVOqKOyeYfH0A/9CCFVoqJ56A4rO3Z8vkx7S2', 'customer', '2025-05-04 17:46:40', '2025-05-19 02:30:33', 'active'),
-(2, 'ModeratorCom', 'moderator@gmail.com', '$2y$10$XoxmJMey4I5/qi6fezqoOeql/gPVAzzxGGyCmH3jsTulj0IyTGM.a', 'admin', '2025-05-07 08:34:36', '2025-05-19 02:30:48', 'active'),
-(17, 'admin', 'admin@gmail.com', '$2y$10$4eoJRzzZk/mmBQGMuhCdHesskQjMX6LAcUNF39336rMbzDhrM0PR2', 'admin', '2025-05-12 19:54:41', '2025-05-18 14:29:06', 'active'),
-(18, 'test2', 'test2@gmail.com', '$2y$10$I6c7mx6am/RkTkc9L7ZDVOIcQVSPgaQPPfAl989ceyY7TUCFizbAK', 'customer', '2025-05-12 19:57:53', '2025-05-18 14:28:01', 'active'),
-(19, 'rere', 'jjj@gmail.com', '$2y$10$AST9LL09uVvGe0Cz.Lqh.O9vht26.zF0o5UtQHgQuLstANsdZ2YmG', 'customer', '2025-05-14 02:51:31', '2025-05-14 02:52:07', 'active'),
-(21, 'dhan', 'dhan@gmail.com', '$2y$10$gbkD.BEaJRWwhrbesVXt2euT3Hknmr9t.51X0Ae5Xy6SsNIQbBclG', 'customer', '2025-05-14 08:07:02', '2025-05-16 06:38:09', 'inactive'),
-(25, 'Manager-Com', 'manager@gmail.com', '$2y$10$h0rgpTnVXOtaJl2YH6r2hu7ojE9nkwRnF9rkKP.AM6l.527XpVGfe', 'customer', '2025-05-19 02:19:39', '2025-05-19 02:19:39', 'active'),
-(26, 'Customer', 'customer@gmail.com', '$2y$10$8KUPjbN9JML45zxAozPB0edP6YiY7TaL31x.Qd79BC9K/2hc11.Fm', 'customer', '2025-05-19 02:23:32', '2025-05-19 02:23:42', 'active');
+(2, 'ModeratorCom', 'moderator@gmail.com', '$2y$10$XoxmJMey4I5/qi6fezqoOeql/gPVAzzxGGyCmH3jsTulj0IyTGM.a', 'admin', '2025-05-07 08:34:36', '2026-05-07 12:00:33', 'active'),
+(17, 'admin', 'admin@gmail.com', '$2y$10$4eoJRzzZk/mmBQGMuhCdHesskQjMX6LAcUNF39336rMbzDhrM0PR2', 'admin', '2025-05-12 19:54:41', '2026-04-21 05:39:07', 'inactive'),
+(18, 'test2', 'test2@gmail.com', '$2y$10$I6c7mx6am/RkTkc9L7ZDVOIcQVSPgaQPPfAl989ceyY7TUCFizbAK', 'customer', '2025-05-12 19:57:53', '2025-05-18 14:28:01', 'inactive'),
+(19, 'rere', 'jjj@gmail.com', '$2y$10$AST9LL09uVvGe0Cz.Lqh.O9vht26.zF0o5UtQHgQuLstANsdZ2YmG', 'customer', '2025-05-14 02:51:31', '2025-05-14 02:52:07', 'inactive'),
+(25, 'Manager-Com', 'manager@gmail.com', '$2y$10$h0rgpTnVXOtaJl2YH6r2hu7ojE9nkwRnF9rkKP.AM6l.527XpVGfe', 'customer', '2025-05-19 02:19:39', '2025-05-19 02:19:39', 'inactive'),
+(26, 'Customer', 'customer@gmail.com', '$2y$10$8KUPjbN9JML45zxAozPB0edP6YiY7TaL31x.Qd79BC9K/2hc11.Fm', 'customer', '2025-05-19 02:23:32', '2025-05-19 02:23:42', 'active'),
+(27, 'RMAC', 'rmac15@gmail.com', '$2y$10$c9R.aWTrTLMVJTk0ubnyXuo.Uh1XrD6bRSXNZlCIfftIjMatj2wyG', 'customer', '2026-04-16 13:01:21', '2026-05-07 11:56:43', 'active');
 
 --
 -- Indexes for dumped tables
@@ -224,19 +214,19 @@ ALTER TABLE `messages`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `reservations`
 --
 ALTER TABLE `reservations`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- Constraints for dumped tables

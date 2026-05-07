@@ -75,6 +75,7 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
     <title>Login - Bicol Depot</title>
     <!--Bootstrap CSS-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
             --primary-blue: #1a4b84;
@@ -104,10 +105,10 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
         .login-container {
             background: rgb(255, 255, 255);
             border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
             padding: 2.5rem;
             max-width: 450px;
-            width: 100%;
+            width: 120%;
             margin: 0 auto;
         }
 
@@ -170,21 +171,34 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
             position: relative;
         }
 
-        .toggle-password {
+        .password-input .form-control {
+            padding-right: 3.2rem;
+        }
+
+        #togglePassword {
             position: absolute;
             right: 12px;
             top: 50%;
             transform: translateY(-50%);
-            background: none;
-            border: none;
             color: #6b7280;
-            font-size: 0.875rem;
+            font-size: 1.1rem;
             cursor: pointer;
-            padding: 0.25rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .toggle-password:hover {
-            color: #374151;
+        #togglePassword:hover {
+            color: var(--primary-blue);
+            background-color: rgba(26, 75, 132, 0.05);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        #togglePassword:active {
+            transform: translateY(-50%) scale(0.95);
         }
     </style>
 </head>
@@ -194,7 +208,7 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
     <div class="container">
         <div class="login-container">
             <div class="logo-container">
-                <h1 class="logo-text">Bicol Depot</h1>
+                <h1 class="logo-text">OptimaFlow</h1>
                 <p class="text-muted mb-4">Welcome back! Please login to your account.</p>
             </div>
 
@@ -215,11 +229,8 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
                 <div class="mb-4">
                     <label for="password" class="form-label text-dark fw-medium">Password</label>
                     <div class="password-input">
-                        <input type="password" class="form-control" id="password" name="password" required
-                            placeholder="Enter your password">
-                        <button type="button" class="toggle-password" onclick="togglePassword('password')">
-                            Show
-                        </button>
+                        <input type="password" class="form-control" id="password" name="password" required placeholder="Enter your password">
+                        <i class="fa-solid fa-eye-slash" id="togglePassword" title="Show password"></i>
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary w-100 mb-4">Sign In</button>
@@ -233,18 +244,22 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
     </div>
 
     <script>
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const button = input.nextElementSibling;
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                button.textContent = 'Hide';
+        togglePassword.addEventListener('click', function() {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                togglePassword.classList.remove('fa-eye-slash');
+                togglePassword.classList.add('fa-eye');
+                togglePassword.title = 'Hide password';
             } else {
-                input.type = 'password';
-                button.textContent = 'Show';
+                passwordInput.type = 'password';
+                togglePassword.classList.remove('fa-eye');
+                togglePassword.classList.add('fa-eye-slash');
+                togglePassword.title = 'Show password';
             }
-        }
+        });
     </script>
 </body>
 </html>
