@@ -86,8 +86,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .signup-title {
             color: var(--primary-blue);
-            font-size: 2rem;
-            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.3rem;
+            font-weight: 1000;
             margin: 0;
         }
 
@@ -154,6 +155,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .submit-button {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             width: 100%;
             padding: 14px;
             font-size: 16px;
@@ -175,6 +181,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .submit-button:active {
             transform: scale(0.98);
+        }
+
+        .button-spinner {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #ffffff;
+            border-right-color: #FFD662;
+            animation: spin 0.10s linear infinite;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .submit-button.is-loading {
+            cursor: wait;
+        }
+
+        .submit-button.is-loading .button-label {
+            opacity: 0;
+        }
+
+        .submit-button.is-loading .button-spinner {
+            opacity: 1;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        
         }
 
         .login-link {
@@ -218,7 +256,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <h1 class="signup-title">Optima<span class="gold-text">Flow</span></h1>
             <p class="signup-subtitle">Create your account</p>
 
-            <form action="signup.php" method="POST">
+            <form action="signup.php" method="POST" id="signupForm">
                 <div class="form-group">
                     <label for="username" class="form-label">Username</label>
                     <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" required>
@@ -243,8 +281,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </select>
                     </div>
             -->
-                <button type="submit" class="submit-button">
-                    Create Account
+                <button type="submit" class="submit-button" id="signupButton">
+                    <span class="button-label">Create Account</span>
+                    <span class="button-spinner" aria-hidden="true"></span>
                 </button>
             </form>
 
@@ -253,6 +292,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </a>
         </div>
     </div>
+
+    <script>
+        const signupForm = document.getElementById('signupForm');
+        const signupButton = document.getElementById('signupButton');
+
+        signupForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            signupButton.classList.add('is-loading');
+            signupButton.disabled = true;
+            signupButton.setAttribute('aria-busy', 'true');
+
+            window.setTimeout(() => {
+                signupForm.submit();
+            }, 250);
+        });
+    </script>
 </body>
 
 </html>
