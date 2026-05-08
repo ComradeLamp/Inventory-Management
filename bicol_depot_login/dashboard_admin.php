@@ -106,16 +106,10 @@ $totalUsers = $totalUsersResult ? $totalUsersResult->fetch_assoc()['total'] : 0;
                     <div class="action-description">Process pending orders</div>
                 </a>
 
-                <a href="#" class="action-card">
-                    <div class="action-icon"><i class="fa-solid fa-chart-line"></i></div>
-                    <div class="action-title">Sales Report</div>
-                    <div class="action-description">View sales analytics</div>
-                </a>
-
-                <a href="#" class="action-card">
-                    <div class="action-icon"><i class="fa-solid fa-gear"></i></div>
-                    <div class="action-title">Settings</div>
-                    <div class="action-description">Configure system settings</div>
+                <a href="admin_users.php" class="action-card">
+                    <div class="action-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="action-title">Manage Users</div>
+                    <div class="action-description">View and manage user accounts</div>
                 </a>
             </section>
 

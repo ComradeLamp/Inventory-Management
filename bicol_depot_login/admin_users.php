@@ -136,8 +136,11 @@ $paginatedUsers = $stmt->get_result();
                     <h2 class="users-title">All Users</h2>
                     <div class="users-search">
                         <div class="search-input-wrapper">
-                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <i class="fa-solid fa-magnifying-glass search-icon-left"></i>
                             <input type="text" id="user-search" class="search-input" placeholder="Search users...">
+                            <button type="button" id="clear-search" class="clear-search-btn" title="Clear search" style="display: none;">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
                         </div>
                         <button class="search-button">
                             <i class="fa-solid fa-magnifying-glass"></i> Search

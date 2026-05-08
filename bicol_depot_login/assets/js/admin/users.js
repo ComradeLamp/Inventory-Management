@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     const searchInput = document.getElementById('user-search');
     const searchButton = document.querySelector('.search-button');
+    const clearButton = document.getElementById('clear-search');
 
     if (searchButton) {
         searchButton.addEventListener('click', filterUsers);
@@ -15,8 +16,34 @@ document.addEventListener('DOMContentLoaded', function () {
                 filterUsers();
             }
         });
+
+        //Show/hide clear button based on input content
+        searchInput.addEventListener('input', toggleClearButton);
+        toggleClearButton(); //Run once on load to set initial state
+    }
+
+    if (clearButton) {
+        clearButton.addEventListener('click', function () {
+            searchInput.value = '';
+            filterUsers();
+            toggleClearButton();
+            searchInput.focus();
+        });
     }
 });
+
+//Show the clear button only when the search input has text
+function toggleClearButton() {
+    const input = document.getElementById('user-search');
+    const clearBtn = document.getElementById('clear-search');
+    if (!input || !clearBtn) return;
+
+    if (input.value.length > 0) {
+        clearBtn.style.display = 'inline-flex';
+    } else {
+        clearBtn.style.display = 'none';
+    }
+}
 
 //Filter table rows by username or email based on the search input value
 function filterUsers() {
