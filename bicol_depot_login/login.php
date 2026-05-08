@@ -110,6 +110,11 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
             max-width: 450px;
             width: 120%;
             margin: 0 auto;
+
+        }
+
+        .gold-text {
+            color: #FFD662;
         }
 
         .logo-text {
@@ -129,11 +134,14 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
             padding: 0.75rem 1rem;
             border-radius: 8px;
             transition: all 0.3s ease;
+            box-shadow: 0 0 6px rgba(255, 214, 98, 0.22);
+
         }
 
         .form-control:focus {
-            border-color: var(--secondary-blue);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 6px rgba(255, 214, 98, 0.22);
+            box-shadow: 0 0 6px #FFD662, 0 0 14px rgba(255, 214, 98, 0.45);
+
         }
 
         .btn-primary {
@@ -143,11 +151,15 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
             border-radius: 8px;
             font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: 0 0 8px rgba(255, 214, 98, 0.4);
+        
         }
 
         .btn-primary:hover {
             background-color: var(--dark-blue);
             transform: translateY(-1px);
+            box-shadow: 0 0 12px #FFD662, 0 0 20px rgba(255, 214, 98, 0.6);   
+        
         }
 
         .links-container a {
@@ -208,7 +220,7 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
     <div class="container">
         <div class="login-container">
             <div class="logo-container">
-                <h1 class="logo-text">OptimaFlow</h1>
+                <h1 class="logo-text"> Optima<span class="gold-text">Flow</span></h1>
                 <p class="text-muted mb-4">Welcome back! Please login to your account.</p>
             </div>
 

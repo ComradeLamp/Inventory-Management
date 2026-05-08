@@ -49,6 +49,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin: 0;
         }
 
+        .gold-text {
+            color: #FFD662;
+        }
+
         .background {
             background-image: url('assets/img/BGP.jpg');
             background-size: cover;
@@ -67,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             align-items: center;
             min-height: 90vh;
             text-align: center;
-            width: 400px;
+            width: 480px;
         }
 
         .signup-card {
@@ -90,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .signup-subtitle {
             color: #5a6474;
             font-size: 16px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .form-group {
@@ -119,8 +123,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .form-input:focus {
             outline: none;
-            border-color: #254b87;
-            box-shadow: 0 0 0 4px rgba(37, 75, 135, 0.1);
+            box-shadow: 0 0 6px rgba(255, 214, 98, 0.22);
+            box-shadow: 0 0 6px #FFD662, 0 0 14px rgba(255, 214, 98, 0.45);
+            /*border-color: #254b87;
+            box-shadow: 0 0 0 4px rgba(37, 75, 135, 0.1);*/
         }
 
         .form-input::placeholder {
@@ -153,16 +159,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             font-size: 16px;
             font-weight: 600;
             color: #ffffff;
-            background-color: #254b87;
+            background-color: var(--primary-blue);
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 0 8px rgba(255, 214, 98, 0.4);
         }
 
         .submit-button:hover {
             background-color: var(--dark-blue);
             transform: translateY(-1px);
+            box-shadow: 0 0 12px #FFD662, 0 0 20px rgba(255, 214, 98, 0.6); 
         }
 
         .submit-button:active {
@@ -207,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="background"></div>
     <div class="signup-container">
         <div class="signup-card">
-            <h1 class="signup-title">Bicol Depot</h1>
+            <h1 class="signup-title">Optima<span class="gold-text">Flow</span></h1>
             <p class="signup-subtitle">Create your account</p>
 
             <form action="signup.php" method="POST">
