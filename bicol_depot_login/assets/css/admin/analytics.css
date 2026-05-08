@@ -1,0 +1,171 @@
+/* =========================================================
+   OptimaFlow - Admin Analytics Page Styles
+   ========================================================= */
+
+:root {
+    --primary: #00539C;
+    --primary-dark: #003566;
+    --accent: #FFD662;
+    --bg: #F5F7FA;
+    --surface: #FFFFFF;
+    --text: #1A2332;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --danger: #DC3545;
+    --warning: #F39C12;
+    --success: #2ECC71;
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 20px rgba(0, 0, 0, 0.08);
+    --radius: 10px;
+    --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body, html {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.container { display: flex; min-height: 100vh; }
+
+/* Sidebar - copy from existing admin pages, sticky */
+.sidebar {
+    width: 240px;
+    background-color: var(--primary-dark);
+    color: #FFFFFF;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.logo {
+    font-size: 1.4em;
+    font-weight: 700;
+    padding: 0 8px;
+    margin-bottom: 32px;
+}
+
+.nav { display: flex; flex-direction: column; gap: 4px; }
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95em;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid transparent;
+    transition: background-color 0.2s ease;
+}
+
+.nav-item i { width: 18px; text-align: center; }
+
+.nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #FFFFFF;
+}
+
+.nav-item.active {
+    background-color: var(--primary);
+    color: #FFFFFF;
+    border-left-color: var(--accent);
+}
+
+.logout-form {
+    margin-top: auto;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logout-form button {
+    all: unset;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 0.95em;
+}
+
+.logout-form button:hover {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #FFFFFF;
+}
+
+.main {
+    flex: 1;
+    padding: 24px 32px;
+    overflow-y: auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.header h1 {
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+.avatar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.95em;
+}
+
+.avatar i { color: var(--primary); }
+
+/* ===== Chart Grid ===== */
+.chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.chart-card {
+    background-color: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-md);
+    padding: 24px;
+}
+
+.chart-card-wide {
+    grid-column: 1 / -1;
+}
+
+.chart-title {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--text);
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    display: inline-block;
+}
+
+canvas {
+    max-height: 300px;
+}
