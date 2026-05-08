@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
             --primary-blue: #1a4b84;
@@ -154,6 +155,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: 0 0 0 4px rgba(37, 75, 135, 0.1);
         }
 
+        .password-input {
+    position: relative;
+}
+
+.password-input .form-input {
+    padding-right: 3.2rem;
+}
+
+#toggleSignupPassword {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#toggleSignupPassword:hover {
+    color: var(--primary-blue);
+    background-color: rgba(26, 75, 132, 0.05);
+    transform: translateY(-50%) scale(1.1);
+}
+
+#toggleSignupPassword:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
         .submit-button {
             position: relative;
             display: inline-flex;
@@ -268,9 +303,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
 
                 <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-input" placeholder="Create a password" required>
-                </div>
+    <label for="password" class="form-label">Password</label>
+    <div class="password-input">
+        <input type="password" id="password" name="password" class="form-input" placeholder="Create a password" required>
+        <i class="fa-solid fa-eye-slash" id="toggleSignupPassword" title="Show password"></i>
+    </div>
+</div>
                 <!--THE ROLES
                 <div class="form-group">
                     <div class="form-group">
@@ -294,20 +332,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
     <script>
-        const signupForm = document.getElementById('signupForm');
-        const signupButton = document.getElementById('signupButton');
+    const toggleSignupPassword = document.getElementById('toggleSignupPassword');
+    const passwordInput = document.getElementById('password');
+    const signupForm = document.getElementById('signupForm');
+    const signupButton = document.getElementById('signupButton');
 
-        signupForm.addEventListener('submit', function (event) {
-            event.preventDefault();
-            signupButton.classList.add('is-loading');
-            signupButton.disabled = true;
-            signupButton.setAttribute('aria-busy', 'true');
+    toggleSignupPassword.addEventListener('click', function() {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleSignupPassword.classList.remove('fa-eye-slash');
+            toggleSignupPassword.classList.add('fa-eye');
+            toggleSignupPassword.title = 'Hide password';
+        } else {
+            passwordInput.type = 'password';
+            toggleSignupPassword.classList.remove('fa-eye');
+            toggleSignupPassword.classList.add('fa-eye-slash');
+            toggleSignupPassword.title = 'Show password';
+        }
+    });
 
-            window.setTimeout(() => {
-                signupForm.submit();
-            }, 250);
-        });
-    </script>
+    signupForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        signupButton.classList.add('is-loading');
+        signupButton.disabled = true;
+        signupButton.setAttribute('aria-busy', 'true');
+
+        window.setTimeout(() => {
+            signupForm.submit();
+        }, 250);
+    });
+</script>
 </body>
 
 </html>
