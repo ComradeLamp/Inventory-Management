@@ -575,7 +575,7 @@ if (isset($_SESSION['just_logged_in']) && $_SESSION['just_logged_in'] === true) 
                 <a href="assets/img/BPOLD.jpg" target="_blank">
                     <img src="assets/img/BPOLD.jpg" alt="Logo" style="height:36px;" class="img-fluid">
                 </a>
-                <a class="navbar-brand mb-0" href="dashboard_customer.php">Bicol <span>Depot</span></a>
+                <a class="navbar-brand mb-0" href="dashboard_customer.php">Optima <span>Flow</span></a>
             </div>
 
             <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
