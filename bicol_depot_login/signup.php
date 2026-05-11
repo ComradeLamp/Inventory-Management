@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         :root {
             --primary-blue: #1a4b84;
@@ -49,6 +50,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin: 0;
         }
 
+        .gold-text {
+            color: #FFD662;
+        }
+
         .background {
             background-image: url('assets/img/BGP.jpg');
             background-size: cover;
@@ -67,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             align-items: center;
             min-height: 90vh;
             text-align: center;
-            width: 400px;
+            width: 480px;
         }
 
         .signup-card {
@@ -82,15 +87,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .signup-title {
             color: var(--primary-blue);
-            font-size: 2rem;
-            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.3rem;
+            font-weight: 1000;
             margin: 0;
         }
 
         .signup-subtitle {
             color: #5a6474;
             font-size: 16px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         .form-group {
@@ -119,8 +125,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .form-input:focus {
             outline: none;
-            border-color: #254b87;
-            box-shadow: 0 0 0 4px rgba(37, 75, 135, 0.1);
+            box-shadow: 0 0 6px rgba(255, 214, 98, 0.22);
+            box-shadow: 0 0 6px #FFD662, 0 0 14px rgba(255, 214, 98, 0.45);
+            /*border-color: #254b87;
+            box-shadow: 0 0 0 4px rgba(37, 75, 135, 0.1);*/
         }
 
         .form-input::placeholder {
@@ -147,26 +155,99 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             box-shadow: 0 0 0 4px rgba(37, 75, 135, 0.1);
         }
 
+        .password-input {
+    position: relative;
+}
+
+.password-input .form-input {
+    padding-right: 3.2rem;
+}
+
+#toggleSignupPassword {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#toggleSignupPassword:hover {
+    color: var(--primary-blue);
+    background-color: rgba(26, 75, 132, 0.05);
+    transform: translateY(-50%) scale(1.1);
+}
+
+#toggleSignupPassword:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
         .submit-button {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
             width: 100%;
             padding: 14px;
             font-size: 16px;
             font-weight: 600;
             color: #ffffff;
-            background-color: #254b87;
+            background-color: var(--primary-blue);
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 0 8px rgba(255, 214, 98, 0.4);
         }
 
         .submit-button:hover {
             background-color: var(--dark-blue);
             transform: translateY(-1px);
+            box-shadow: 0 0 12px #FFD662, 0 0 20px rgba(255, 214, 98, 0.6); 
         }
 
         .submit-button:active {
             transform: scale(0.98);
+        }
+
+        .button-spinner {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #ffffff;
+            border-right-color: #FFD662;
+            animation: spin 0.10s linear infinite;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+        }
+
+        .submit-button.is-loading {
+            cursor: wait;
+        }
+
+        .submit-button.is-loading .button-label {
+            opacity: 0;
+        }
+
+        .submit-button.is-loading .button-spinner {
+            opacity: 1;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        
         }
 
         .login-link {
@@ -207,10 +288,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="background"></div>
     <div class="signup-container">
         <div class="signup-card">
-            <h1 class="signup-title">Bicol Depot</h1>
+            <h1 class="signup-title">Optima<span class="gold-text">Flow</span></h1>
             <p class="signup-subtitle">Create your account</p>
 
-            <form action="signup.php" method="POST">
+            <form action="signup.php" method="POST" id="signupForm">
                 <div class="form-group">
                     <label for="username" class="form-label">Username</label>
                     <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" required>
@@ -222,9 +303,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
 
                 <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-input" placeholder="Create a password" required>
-                </div>
+    <label for="password" class="form-label">Password</label>
+    <div class="password-input">
+        <input type="password" id="password" name="password" class="form-input" placeholder="Create a password" required>
+        <i class="fa-solid fa-eye-slash" id="toggleSignupPassword" title="Show password"></i>
+    </div>
+</div>
                 <!--THE ROLES
                 <div class="form-group">
                     <div class="form-group">
@@ -235,8 +319,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         </select>
                     </div>
             -->
-                <button type="submit" class="submit-button">
-                    Create Account
+                <button type="submit" class="submit-button" id="signupButton">
+                    <span class="button-label">Create Account</span>
+                    <span class="button-spinner" aria-hidden="true"></span>
                 </button>
             </form>
 
@@ -245,6 +330,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </a>
         </div>
     </div>
+
+    <script>
+    const toggleSignupPassword = document.getElementById('toggleSignupPassword');
+    const passwordInput = document.getElementById('password');
+    const signupForm = document.getElementById('signupForm');
+    const signupButton = document.getElementById('signupButton');
+
+    toggleSignupPassword.addEventListener('click', function() {
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleSignupPassword.classList.remove('fa-eye-slash');
+            toggleSignupPassword.classList.add('fa-eye');
+            toggleSignupPassword.title = 'Hide password';
+        } else {
+            passwordInput.type = 'password';
+            toggleSignupPassword.classList.remove('fa-eye');
+            toggleSignupPassword.classList.add('fa-eye-slash');
+            toggleSignupPassword.title = 'Show password';
+        }
+    });
+
+    signupForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+        signupButton.classList.add('is-loading');
+        signupButton.disabled = true;
+        signupButton.setAttribute('aria-busy', 'true');
+
+        window.setTimeout(() => {
+            signupForm.submit();
+        }, 250);
+    });
+</script>
 </body>
 
 </html>

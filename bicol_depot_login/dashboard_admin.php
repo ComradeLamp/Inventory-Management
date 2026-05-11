@@ -48,6 +48,7 @@ $totalUsers = $totalUsersResult ? $totalUsersResult->fetch_assoc()['total'] : 0;
                 <a href="admin_products.php" class="nav-item"><i class="fa-solid fa-box"></i> Products</a>
                 <a href="admin_users.php" class="nav-item"><i class="fa-solid fa-users"></i> Users</a>
                 <a href="admin_order.php" class="nav-item"><i class="fa-solid fa-clipboard-list"></i> Orders</a>
+                <a href="admin_analytics.php" class="nav-item"><i class="fa-solid fa-chart-line"></i> Analytics</a>
                 <form action="logout.php" method="post" class="logout-form">
                     <button type="submit"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </form>
