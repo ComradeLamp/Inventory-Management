@@ -308,7 +308,7 @@
 
     <!-- Footer -->
     <footer>
-        &copy; 2025 <strong>Bicol Depot</strong>. All rights reserved.
+        &copy; 2025 <strong>Optima Flow</strong>. All rights reserved.
     </footer>
 
 </body>
