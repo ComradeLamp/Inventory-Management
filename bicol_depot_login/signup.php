@@ -6,7 +6,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email    = $_POST['email'];
     $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
     $role = isset($_POST['role']) ? $_POST['role'] : 'customer';
-    //'customer' or 'admin' but now just customer as default
 
     $stmt = $conn->prepare("INSERT INTO users (username, email, password, role) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("ssss", $username, $email, $password, $role);
@@ -25,226 +24,271 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Sign Up - Optima Flow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-blue: #1a4b84;
-            --secondary-blue: #2563eb;
-            --dark-blue: #0f2d4e;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --blue:    #2B5EAB;
+            --blue-dk: #1A3F7A;
+            --gold:    #C9A84C;
+            --beige:   #F5F0DC;
+            --dark:    #0E1F3D;
+            --mid:     #2C3A5E;
+            --muted:   #6B7A99;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.5;
+            font-family: 'DM Sans', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0;
+            background: var(--beige);
+            position: relative;
+            overflow: hidden;
         }
 
-        .background {
-            background-image: url('assets/img/BGP.jpg');
-            background-size: cover;
-            background-position: center;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: -1;
+        /* Background decorative blobs */
+        .geo-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        .signup-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 90vh;
-            text-align: center;
-            width: 400px;
-        }
-
+        /* ── CARD ── */
         .signup-card {
+            position: relative;
+            z-index: 1;
             width: 100%;
-            max-width: 700px;
-            background-color: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            padding: 30px;
+            max-width: 440px;
+            margin: 2rem 1.2rem;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(43,94,171,0.12);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(14,31,61,0.1), 0 4px 16px rgba(14,31,61,0.06);
+            padding: 2.8rem 2.4rem 2.4rem;
+            animation: fadeUp 0.6s ease both;
+        }
+
+        /* ── HEADER ── */
+        .card-header {
             text-align: center;
+            margin-bottom: 2rem;
         }
 
-        .signup-title {
-            color: var(--primary-blue);
+        .brand {
+            font-family: 'Playfair Display', serif;
             font-size: 2rem;
-            font-weight: 700;
-            margin: 0;
+            font-weight: 900;
+            color: var(--dark);
+            letter-spacing: -0.02em;
+            display: block;
+            margin-bottom: 0.3rem;
+            text-decoration: none;
         }
 
-        .signup-subtitle {
-            color: #5a6474;
-            font-size: 16px;
-            margin-bottom: 10px;
+        .brand span { color: var(--blue); }
+
+        .brand-underline {
+            display: block;
+            width: 40px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 2px;
+            margin: 0.5rem auto 0.8rem;
+            animation: growLine 0.5s 0.7s ease both;
+            transform: scaleX(0);
+            transform-origin: center;
         }
 
+        .card-subtitle {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--muted);
+            letter-spacing: 0.04em;
+        }
+
+        /* ── FORM ── */
         .form-group {
-            margin-bottom: 15px;
-            text-align: left;
+            margin-bottom: 1.1rem;
         }
 
         .form-label {
             display: block;
-            color: #344054;
-            font-size: 16px;
+            font-size: 0.78rem;
             font-weight: 500;
-            margin-bottom: 8px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--mid);
+            margin-bottom: 0.45rem;
         }
 
         .form-input {
             width: 100%;
-            padding: 14px 16px;
-            font-size: 16px;
-            color: #1c2b41;
-            background-color: #ffffff;
-            border: 1px solid #d0d5dd;
+            padding: 0.78rem 1rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            color: var(--dark);
+            background: rgba(245,240,220,0.5);
+            border: 1.5px solid rgba(43,94,171,0.18);
             border-radius: 8px;
             transition: all 0.2s ease;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: #254b87;
-            box-shadow: 0 0 0 4px rgba(37, 75, 135, 0.1);
+            border-color: var(--blue);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(43,94,171,0.1);
         }
 
         .form-input::placeholder {
-            color: #98a2b3;
+            color: #aab2c8;
+            font-weight: 300;
         }
 
-        .form-select {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 16px;
-            color: #1c2b41;
-            background-color: #ffffff;
-            border: 1px solid #d0d5dd;
-            border-radius: 8px;
-            background-image: url('assets/img/BGPic.jpg');
-            background-image: url('assets/img/BGPic.jpg');
-            background-repeat: no-repeat;
-            background-position: cover;
-        }
-
-        .form-select:focus {
-            outline: none;
-            border-color: #254b87;
-            box-shadow: 0 0 0 4px rgba(37, 75, 135, 0.1);
-        }
-
+        /* ── SUBMIT ── */
         .submit-button {
             width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #ffffff;
-            background-color: #254b87;
+            margin-top: 0.6rem;
+            padding: 0.9rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            color: white;
+            background: var(--blue);
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 4px 18px rgba(43,94,171,0.3);
+            transition: all 0.22s ease;
         }
 
         .submit-button:hover {
-            background-color: var(--dark-blue);
-            transform: translateY(-1px);
+            background: var(--blue-dk);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(43,94,171,0.4);
         }
 
         .submit-button:active {
             transform: scale(0.98);
         }
 
+        /* ── FOOTER LINK ── */
         .login-link {
             display: block;
-            margin: 24px auto 0;
-            color: #254b87;
-            font-size: 16px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: color 0.2s ease;
+            margin-top: 1.4rem;
             text-align: center;
+            font-size: 0.82rem;
+            color: var(--muted);
+            text-decoration: none;
+            transition: color 0.2s;
         }
 
-        .login-link:hover {
-            color: #1a3c6d;
+        .login-link a {
+            color: var(--blue);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            color: var(--blue-dk);
             text-decoration: underline;
         }
 
-        @media (max-width: 576px) {
-            .signup-card {
-                padding: 24px;
-            }
+        /* ── DIVIDER ── */
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(43,94,171,0.1);
+            margin: 1.6rem 0 1.2rem;
+        }
 
-            .signup-title {
-                font-size: 24px;
-            }
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
 
-            .signup-subtitle {
-                font-size: 14px;
-                margin-bottom: 24px;
-            }
+        @keyframes growLine {
+            to { transform: scaleX(1); }
+        }
+
+        @media (max-width: 480px) {
+            .signup-card { padding: 2rem 1.4rem; }
+            .brand { font-size: 1.7rem; }
         }
     </style>
 </head>
 
 <body>
-    <div class="background"></div>
-    <div class="background"></div>
-    <div class="signup-container">
-        <div class="signup-card">
-            <h1 class="signup-title">Bicol Depot</h1>
-            <p class="signup-subtitle">Create your account</p>
 
-            <form action="signup.php" method="POST">
-                <div class="form-group">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-input" placeholder="Create a password" required>
-                </div>
-                <!--THE ROLES
-                <div class="form-group">
-                    <div class="form-group">
-                        <label for="role" class="form-label">Role</label>
-                        <select id="role" name="role" class="form-select" required>
-                            <option value="customer">Customer</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-            -->
-                <button type="submit" class="submit-button">
-                    Create Account
-                </button>
-            </form>
-
-            <a href="login.php" class="login-link">
-                Already have an account? Login
-            </a>
-        </div>
+    <div class="geo-bg">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="tri" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+                    <polygon points="30,4 56,56 4,56" fill="none" stroke="rgba(43,94,171,0.07)" stroke-width="1"/>
+                </pattern>
+                <pattern id="dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
+                    <circle cx="15" cy="15" r="1.3" fill="rgba(43,94,171,0.12)"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#tri)"/>
+            <rect width="100%" height="100%" fill="url(#dots)"/>
+            <circle cx="18%" cy="18%" r="220" fill="none" stroke="rgba(43,94,171,0.06)" stroke-width="1.5"/>
+            <circle cx="18%" cy="18%" r="150" fill="none" stroke="rgba(43,94,171,0.05)" stroke-width="1"/>
+            <circle cx="85%" cy="82%" r="200" fill="none" stroke="rgba(201,168,76,0.1)" stroke-width="1.5"/>
+            <circle cx="85%" cy="82%" r="130" fill="none" stroke="rgba(201,168,76,0.07)" stroke-width="1"/>
+        </svg>
     </div>
-</body>
 
+    <div class="signup-card">
+
+        <div class="card-header">
+            <a class="brand" href="index.php">Optima <span>Flow</span></a>
+            <span class="brand-underline"></span>
+            <p class="card-subtitle">Create your account to get started</p>
+        </div>
+
+        <form action="signup.php" method="POST">
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" id="username" name="username" class="form-input" placeholder="Enter your username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="Create a password" required>
+            </div>
+
+            <!--THE ROLES
+            <div class="form-group">
+                <label for="role" class="form-label">Role</label>
+                <select id="role" name="role" class="form-input" required>
+                    <option value="customer">Customer</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            -->
+
+            <button type="submit" class="submit-button">Create Account →</button>
+        </form>
+
+        <hr class="divider">
+
+        <p class="login-link">Already have an account? <a href="login.php">Log in</a></p>
+
+    </div>
+
+</body>
 </html>

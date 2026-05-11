@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-//Check if user is logged in
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
     exit();
@@ -12,27 +11,22 @@ include 'db.php';
 $success_message = "";
 $error_message = "";
 
-//Handle message submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_message'])) {
-    //Get form data
     $subject = isset($_POST['subject']) ? $_POST['subject'] : '';
     $message = isset($_POST['message']) ? $_POST['message'] : '';
     $user_id = $_SESSION['user']['id'];
-    
-    //Validate input
+
     if (empty($subject) || empty($message)) {
         $error_message = "Please fill in all fields";
     } else {
-        //Escape strings after validation
         $subject = mysqli_real_escape_string($conn, $subject);
         $message = mysqli_real_escape_string($conn, $message);
-        
-        //First, check the structure of the messages table to determine column names
+
         $columnCheckQuery = "DESCRIBE messages";
-        $columnResult = $conn->query($columnCheckQuery);
-        
+        $tableCheck = $conn->query("SHOW TABLES LIKE 'messages'");
+        $columnResult = ($tableCheck && $tableCheck->num_rows > 0) ? $conn->query($columnCheckQuery) : false;
+
         if (!$columnResult) {
-            //Table doesn't exist, create it
             $createTableQuery = "CREATE TABLE messages (
                 id INT(11) AUTO_INCREMENT PRIMARY KEY,
                 user_id INT(11) NOT NULL,
@@ -41,12 +35,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_message'])) {
                 is_read TINYINT(1) DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )";
-            
-            //First, check if users table exists to set up FK
             $userTableCheck = $conn->query("SHOW TABLES LIKE 'users'");
-            
             if ($userTableCheck && $userTableCheck->num_rows > 0) {
-                //Add FK constraint
                 $createTableQuery = "CREATE TABLE messages (
                     id INT(11) AUTO_INCREMENT PRIMARY KEY,
                     user_id INT(11) NOT NULL,
@@ -57,75 +47,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_message'])) {
                     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
                 )";
             }
-            
             if (!$conn->query($createTableQuery)) {
                 $error_message = "Error creating messages table: " . $conn->error;
             } else {
-                $columnResult = $conn->query($columnCheckQuery); //Re-query after creating table
+                $columnResult = $conn->query($columnCheckQuery);
             }
         }
-        
+
         if ($columnResult) {
-            //Check which columns exist in the table
-            $columns = array();
-            $hasSubject = false;
-            $hasTitle = false;
-            $hasContent = false;
-            $hasMessage = false;
-            
+            $columns = []; $hasSubject = $hasTitle = $hasContent = $hasMessage = false;
             while ($row = $columnResult->fetch_assoc()) {
                 $columns[] = $row['Field'];
                 if ($row['Field'] == 'subject') $hasSubject = true;
-                if ($row['Field'] == 'title') $hasTitle = true;
+                if ($row['Field'] == 'title')   $hasTitle   = true;
                 if ($row['Field'] == 'content') $hasContent = true;
                 if ($row['Field'] == 'message') $hasMessage = true;
             }
-            
-            //Determine which column names to use
-            $subjectColumn = $hasSubject ? 'subject' : ($hasTitle ? 'title' : 'subject');
+            $subjectColumn = $hasSubject ? 'subject' : ($hasTitle   ? 'title'   : 'subject');
             $messageColumn = $hasContent ? 'content' : ($hasMessage ? 'message' : 'content');
-            
             try {
-                //Alter table to add subject column if needed
-                if (!$hasSubject && !$hasTitle) {
-                    $alterQuery = "ALTER TABLE messages ADD COLUMN subject VARCHAR(255) NOT NULL AFTER user_id";
-                    $conn->query($alterQuery);
-                    $subjectColumn = 'subject';
-                }
-                
-                //Alter table to add content column if needed
-                if (!$hasContent && !$hasMessage) {
-                    $alterQuery = "ALTER TABLE messages ADD COLUMN content TEXT NOT NULL AFTER $subjectColumn";
-                    $conn->query($alterQuery);
-                    $messageColumn = 'content';
-                }
-                
-                //Insert message into db
-                $insertQuery = "INSERT INTO messages (user_id, $subjectColumn, $messageColumn) VALUES (?, ?, ?)";
-                $stmt = $conn->prepare($insertQuery);
-                
-                //Check if prepare was successful
+                if (!$hasSubject && !$hasTitle) { $conn->query("ALTER TABLE messages ADD COLUMN subject VARCHAR(255) NOT NULL AFTER user_id"); $subjectColumn = 'subject'; }
+                if (!$hasContent && !$hasMessage) { $conn->query("ALTER TABLE messages ADD COLUMN content TEXT NOT NULL AFTER $subjectColumn"); $messageColumn = 'content'; }
+                $stmt = $conn->prepare("INSERT INTO messages (user_id, $subjectColumn, $messageColumn) VALUES (?, ?, ?)");
                 if ($stmt) {
                     $stmt->bind_param("iss", $user_id, $subject, $message);
-                    
-                    if ($stmt->execute()) {
-                        $success_message = "Your message has been sent to the administrator.";
-                    } else {
-                        throw new Exception("Error executing statement: " . $stmt->error);
-                    }
+                    if ($stmt->execute()) { $success_message = "Your message has been sent to the administrator."; }
+                    else { throw new Exception("Error: " . $stmt->error); }
                     $stmt->close();
-                } else {
-                    throw new Exception("Error preparing statement: " . $conn->error);
-                }
+                } else { throw new Exception("Prepare error: " . $conn->error); }
             } catch (Exception $e) {
-                //Fallback approach. Direct SQL with detected column names
-                $insertDirectQuery = "INSERT INTO messages (user_id, $subjectColumn, $messageColumn) 
-                    VALUES ('$user_id', '$subject', '$message')";
-                if ($conn->query($insertDirectQuery)) {
-                    $success_message = "Your message has been sent to the administrator.";
-                } else {
-                    $error_message = "Error sending message: " . $conn->error . " - Query: $insertDirectQuery";
-                }
+                $q = "INSERT INTO messages (user_id, $subjectColumn, $messageColumn) VALUES ('$user_id', '$subject', '$message')";
+                if ($conn->query($q)) { $success_message = "Your message has been sent to the administrator."; }
+                else { $error_message = "Error sending message: " . $conn->error; }
             }
         } else {
             $error_message = "Could not determine table structure: " . $conn->error;
@@ -133,266 +86,351 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_message'])) {
     }
 }
 
-//Get user's previous messages
 $user_id = $_SESSION['user']['id'];
-$previousMessages = array();
-
-//First check the structure of the messages table to determine column names
-$columnCheckQuery = "DESCRIBE messages";
-$columnResult = $conn->query($columnCheckQuery);
-
+$previousMessages = [];
+$tableExists = $conn->query("SHOW TABLES LIKE 'messages'");
+$columnResult = ($tableExists && $tableExists->num_rows > 0) ? $conn->query("DESCRIBE messages") : false;
 if ($columnResult) {
-    //Check which columns exist in the table
-    $columns = array();
-    $hasSubject = false;
-    $hasTitle = false;
-    $hasContent = false;
-    $hasMessage = false;
-    
+    $hasSubject = $hasTitle = $hasContent = $hasMessage = false;
     while ($row = $columnResult->fetch_assoc()) {
-        $columns[] = $row['Field'];
         if ($row['Field'] == 'subject') $hasSubject = true;
-        if ($row['Field'] == 'title') $hasTitle = true;
+        if ($row['Field'] == 'title')   $hasTitle   = true;
         if ($row['Field'] == 'content') $hasContent = true;
         if ($row['Field'] == 'message') $hasMessage = true;
     }
-    
-    //Determine which column names to use
-    $subjectColumn = $hasSubject ? 'subject' : ($hasTitle ? 'title' : '');
+    $subjectColumn = $hasSubject ? 'subject' : ($hasTitle   ? 'title'   : '');
     $messageColumn = $hasContent ? 'content' : ($hasMessage ? 'message' : '');
-    
     if (!empty($subjectColumn) && !empty($messageColumn)) {
         try {
-            $messagesQuery = "SELECT id, user_id, $subjectColumn as subject, $messageColumn as content, is_read, created_at 
-                FROM messages WHERE user_id = ? ORDER BY created_at DESC";
-            $stmt = $conn->prepare($messagesQuery);
-            
+            $stmt = $conn->prepare("SELECT id, user_id, $subjectColumn as subject, $messageColumn as content, is_read, created_at FROM messages WHERE user_id = ? ORDER BY created_at DESC");
             if ($stmt) {
                 $stmt->bind_param("i", $user_id);
                 $stmt->execute();
                 $result = $stmt->get_result();
-                
-                while ($row = $result->fetch_assoc()) {
-                    $previousMessages[] = $row;
-                }
+                while ($row = $result->fetch_assoc()) { $previousMessages[] = $row; }
                 $stmt->close();
-            } else {
-                //Go back to direct query
-                $messagesDirectQuery = "SELECT id, user_id, $subjectColumn as subject, $messageColumn as content, is_read, created_at 
-                    FROM messages WHERE user_id = '$user_id' ORDER BY created_at DESC";
-                $result = $conn->query($messagesDirectQuery);
-                
-                if ($result) {
-                    while ($row = $result->fetch_assoc()) {
-                        $previousMessages[] = $row;
-                    }
-                }
             }
-        } catch (Exception $e) {
-            //Will just show no previous messages
-        }
+        } catch (Exception $e) {}
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Admin - OptimaFlow</title>
-    
-    <!--Bootstrap CSS-->
+    <title>Contact - Optima Flow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!--BS ICONS CSS-->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <!--Custom CSS-->
     <link rel="stylesheet" href="assets/css/style.css">
-    
     <style>
-        .message-list {
-            margin-top: 3rem;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --blue:    #2B5EAB;
+            --blue-dk: #1A3F7A;
+            --blue-lt: #E8F0FA;
+            --gold:    #C9A84C;
+            --gold-lt: #F5EDD0;
+            --beige:   #F5F0DC;
+            --dark:    #0E1F3D;
+            --mid:     #2C3A5E;
+            --muted:   #6B7A99;
+            --card-bg: rgba(255,255,255,0.82);
         }
-        
-        .message-card {
-            margin-bottom: 1rem;
-            border-left: 4px solid #3498db;
+
+        body { font-family: 'DM Sans', sans-serif; background: var(--beige); color: var(--dark); min-height: 100vh; }
+
+        .geo-fixed { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+
+        /* ── NAVBAR ── */
+        .navbar {
+            background: rgba(245,240,220,0.92) !important;
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(43,94,171,0.1);
+            padding: 0.9rem 0;
+            position: sticky; top: 0; z-index: 999;
         }
-        
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-        }
-        
-        .message-read {
-            border-left-color: #95a5a6;
-        }
-        
-        .read-status {
-            display: inline-block;
-            padding: 0.2rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-        
-        .status-read {
-            background-color: #95a5a6;
-            color: white;
-        }
-        
-        .status-unread {
-            background-color: #3498db;
-            color: white;
-        }
+        .navbar-brand { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 900; color: var(--dark) !important; letter-spacing: -0.02em; }
+        .navbar-brand span { color: var(--blue); }
+        .nav-link { font-size: 0.88rem; font-weight: 500; color: var(--mid) !important; padding: 0.4rem 0.9rem !important; border-radius: 6px; transition: all 0.2s; }
+        .nav-link:hover, .nav-link.active { color: var(--blue) !important; background: var(--blue-lt); }
+        .btn-nav-cart { font-size: 0.82rem; font-weight: 500; color: var(--blue) !important; border: 1.5px solid rgba(43,94,171,0.35) !important; border-radius: 6px !important; padding: 0.38rem 1rem !important; transition: all 0.2s; text-decoration: none; }
+        .btn-nav-cart:hover { background: var(--blue) !important; color: white !important; }
+        .btn-nav-logout { font-size: 0.82rem; font-weight: 500; color: #922B21 !important; border: 1.5px solid rgba(146,43,33,0.3) !important; border-radius: 6px !important; padding: 0.38rem 1rem !important; transition: all 0.2s; text-decoration: none; }
+        .btn-nav-logout:hover { background: #922B21 !important; color: white !important; }
+
+        .main-content { position: relative; z-index: 1; padding-bottom: 4rem; }
+
+        /* ── PAGE HEADER ── */
+        .page-header { padding: 3.5rem 0 2rem; text-align: center; }
+        .page-pill { display: inline-block; font-size: 0.7rem; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--blue); background: rgba(43,94,171,0.08); border: 1px solid rgba(43,94,171,0.2); border-radius: 999px; padding: 0.35rem 1rem; margin-bottom: 1rem; }
+        .page-header h1 { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; color: var(--dark); margin-bottom: 0.5rem; }
+        .page-header h1 span { color: var(--blue); position: relative; }
+        .page-header h1 span::after { content: ''; position: absolute; left: 0; right: 0; bottom: -4px; height: 3px; background: var(--gold); border-radius: 2px; }
+        .page-header p { font-size: 0.92rem; font-weight: 300; color: var(--muted); max-width: 480px; margin: 0 auto; }
+
+        /* ── ALERTS ── */
+        .themed-alert { padding: 0.8rem 1rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 1.4rem; display: flex; align-items: center; gap: 0.6rem; }
+        .alert-ok { background: rgba(39,174,96,0.08); border: 1px solid rgba(39,174,96,0.25); color: #1E8449; }
+        .alert-err { background: rgba(192,57,43,0.08); border: 1px solid rgba(192,57,43,0.2); color: #922B21; }
+
+        /* ── CARDS ── */
+        .themed-card { background: var(--card-bg); border: 1px solid rgba(43,94,171,0.1); border-radius: 12px; overflow: hidden; height: 100%; }
+
+        .card-head { padding: 1rem 1.4rem; display: flex; align-items: center; gap: 0.6rem; border-bottom: 1px solid rgba(43,94,171,0.08); }
+        .card-head-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--blue-lt); display: flex; align-items: center; justify-content: center; color: var(--blue); font-size: 0.95rem; flex-shrink: 0; }
+        .card-head-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--dark); margin: 0; }
+
+        .card-head.gold-head { background: var(--gold-lt); border-bottom: 1px solid rgba(201,168,76,0.2); }
+        .card-head.gold-head .card-head-icon { background: rgba(201,168,76,0.15); color: #7A5C10; }
+        .card-head.gold-head .card-head-title { color: #5C3D00; }
+
+        .card-head.mid-head { background: var(--blue-lt); }
+
+        .card-body-pad { padding: 1.4rem; }
+
+        /* ── FORM ELEMENTS ── */
+        .form-lbl { display: block; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); margin-bottom: 0.4rem; }
+        .form-inp { width: 100%; padding: 0.72rem 1rem; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; color: var(--dark); background: rgba(245,240,220,0.5); border: 1.5px solid rgba(43,94,171,0.18); border-radius: 8px; transition: all 0.2s; resize: vertical; }
+        .form-inp:focus { outline: none; border-color: var(--blue); background: white; box-shadow: 0 0 0 4px rgba(43,94,171,0.1); }
+        .form-inp::placeholder { color: #aab2c8; font-weight: 300; }
+        .form-group { margin-bottom: 1.1rem; }
+
+        .btn-send { width: 100%; padding: 0.85rem; font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500; color: white; background: var(--blue); border: none; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 18px rgba(43,94,171,0.28); transition: all 0.22s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-send:hover { background: var(--blue-dk); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(43,94,171,0.38); }
+
+        /* ── USER INFO ── */
+        .info-row { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.85rem; color: var(--mid); padding: 0.55rem 0; border-bottom: 1px solid rgba(43,94,171,0.07); }
+        .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .info-label { font-weight: 500; color: var(--dark); min-width: 90px; }
+        .info-note { font-size: 0.78rem; color: var(--muted); margin-top: 0.8rem; line-height: 1.5; }
+
+        /* ── CONTACT OPTIONS ── */
+        .contact-item { display: flex; align-items: center; gap: 0.8rem; font-size: 0.85rem; color: var(--mid); padding: 0.6rem 0; border-bottom: 1px solid rgba(43,94,171,0.07); }
+        .contact-item:last-child { border-bottom: none; }
+        .contact-icon { width: 32px; height: 32px; border-radius: 7px; background: var(--blue-lt); display: flex; align-items: center; justify-content: center; color: var(--blue); font-size: 0.9rem; flex-shrink: 0; }
+        .contact-item a { color: var(--blue); text-decoration: none; font-weight: 500; }
+        .contact-item a:hover { text-decoration: underline; }
+
+        /* ── SECTION HEADING ── */
+        .section-heading { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: var(--dark); margin-bottom: 0.4rem; position: relative; display: inline-block; }
+        .section-heading::after { content: ''; position: absolute; left: 0; bottom: -7px; width: 36px; height: 3px; background: var(--gold); border-radius: 2px; }
+
+        /* ── MESSAGE HISTORY ── */
+        .msg-card { background: var(--card-bg); border: 1px solid rgba(43,94,171,0.1); border-left: 4px solid var(--blue); border-radius: 10px; padding: 1.2rem 1.4rem; margin-bottom: 1rem; transition: box-shadow 0.2s; }
+        .msg-card:hover { box-shadow: 0 8px 24px rgba(14,31,61,0.09); }
+        .msg-card.msg-read { border-left-color: rgba(43,94,171,0.25); opacity: 0.85; }
+        .msg-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; font-size: 0.75rem; color: var(--muted); }
+        .msg-subject { font-family: 'Playfair Display', serif; font-size: 0.98rem; font-weight: 700; color: var(--dark); margin-bottom: 0.4rem; }
+        .msg-body { font-size: 0.83rem; color: var(--mid); line-height: 1.6; }
+        .status-pill { display: inline-block; font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.2rem 0.6rem; border-radius: 999px; }
+        .status-unread { background: rgba(43,94,171,0.1); color: var(--blue); border: 1px solid rgba(43,94,171,0.2); }
+        .status-read { background: rgba(107,122,153,0.1); color: var(--muted); border: 1px solid rgba(107,122,153,0.2); }
+
+        .empty-msg { background: var(--card-bg); border: 1px dashed rgba(43,94,171,0.2); border-radius: 10px; padding: 2rem; text-align: center; color: var(--muted); font-size: 0.88rem; }
+
+        /* ── FOOTER ── */
+        footer { position: relative; z-index: 1; background: var(--dark); color: rgba(255,255,255,0.5); padding: 2rem 0; font-size: 0.8rem; text-align: center; margin-top: 2rem; }
+        footer strong { color: var(--gold); }
+        footer a { color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.2s; }
+        footer a:hover { color: white; }
     </style>
 </head>
 <body>
-    <!--Navigation Bar-->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
-        <div class="container">
-            <div class="d-flex align-items-center">
-                <a href="assets/img/BPOLD.jpg" target="_blank">
-                    <img src="assets/img/BPOLD.jpg" alt="Logo" style="height: 40px;" class="me-2 img-fluid">
-                </a>
-                <a class="navbar-brand mb-0 h1">OptimaFlow</a>
-            </div>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <!-- GEO BACKGROUND -->
+    <div class="geo-fixed">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="cHex" x="0" y="0" width="60" height="52" patternUnits="userSpaceOnUse">
+                    <polygon points="30,2 58,17 58,47 30,62 2,47 2,17" fill="none" stroke="rgba(43,94,171,0.06)" stroke-width="1"/>
+                </pattern>
+                <pattern id="cDots" x="0" y="0" width="38" height="38" patternUnits="userSpaceOnUse">
+                    <circle cx="19" cy="19" r="1.3" fill="rgba(201,168,76,0.17)"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#cHex)"/>
+            <rect width="100%" height="100%" fill="url(#cDots)"/>
+            <circle cx="85%" cy="12%" r="240" fill="none" stroke="rgba(43,94,171,0.05)" stroke-width="1.5"/>
+            <circle cx="85%" cy="12%" r="160" fill="none" stroke="rgba(43,94,171,0.04)" stroke-width="1"/>
+            <circle cx="10%" cy="88%" r="200" fill="none" stroke="rgba(201,168,76,0.08)" stroke-width="1.5"/>
+        </svg>
+    </div>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <div class="d-flex align-items-center gap-2">
+                <a href="assets/img/BPOLD.jpg" target="_blank">
+                    <img src="assets/img/BPOLD.jpg" alt="Logo" style="height:36px;" class="img-fluid">
+                </a>
+                <a class="navbar-brand mb-0" href="dashboard_customer.php">Optima <span>Flow</span></a>
+            </div>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" href="dashboard_customer.php">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="products.php">Products</a></li>
-                    <li class="nav-item"><a class="nav-link" href="AboutUS.html">About Us</a></li>
-                    <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
-                    <li class="nav-item"><a class="btn btn-outline-primary me-2" href="reservations.php"><i class="bi bi-cart"></i> Cart</a></li>
-                    <li class="nav-item"><a class="btn btn-outline-danger" href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                <ul class="navbar-nav ms-auto align-items-center gap-1">
+                    <li class="nav-item"><a class="nav-link" href="dashboard_customer.php"><i class="bi bi-house me-1"></i>Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="products.php"><i class="bi bi-grid me-1"></i>Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="AboutUS.html"><i class="bi bi-info-circle me-1"></i>About Us</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="contact.php"><i class="bi bi-envelope me-1"></i>Contact</a></li>
+                    <li class="nav-item ms-2"><a class="btn-nav-cart" href="reservations.php"><i class="bi bi-cart me-1"></i>Cart</a></li>
+                    <li class="nav-item ms-1"><a class="btn-nav-logout" href="logout.php"><i class="bi bi-box-arrow-right me-1"></i>Logout</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!--Main Con-->
-    <div class="container py-5">
-        <h1 class="mb-4 text-center">Contact Administrator</h1>
-        <p class="text-center mb-5">Have a question or concern? Send a message directly to our administrators.</p>
-        
-        <!--Alerts for success/error messages-->
-        <?php if(!empty($success_message)): ?>
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <?php echo $success_message; ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="main-content">
+        <div class="container">
+
+            <!-- PAGE HEADER -->
+            <div class="page-header">
+                <span class="page-pill"><i class="bi bi-envelope me-1"></i>Get in Touch</span>
+                <h1>Contact <span>Admin</span></h1>
+                <p>Have a question or concern? Send a message directly to our administrators.</p>
             </div>
-        <?php endif; ?>
-        
-        <?php if(!empty($error_message)): ?>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <?php echo $error_message; ?>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
+            <!-- ALERTS -->
+            <?php if (!empty($success_message)): ?>
+            <div class="themed-alert alert-ok">
+                <i class="bi bi-check-circle-fill"></i>
+                <?= htmlspecialchars($success_message) ?>
             </div>
-        <?php endif; ?>
-        
-        <div class="row">
-            <!--Message Form-->
-            <div class="col-md-6 mb-4">
-                <div class="card shadow">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Send New Message</h4>
-                    </div>
-                    <div class="card-body">
-                        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                            <div class="mb-3">
-                                <label for="subject" class="form-label">Subject</label>
-                                <input type="text" class="form-control" id="subject" name="subject" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="message" class="form-label">Message</label>
-                                <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
-                            </div>
-                            <div class="d-grid">
-                                <button type="submit" name="submit_message" class="btn btn-primary">Send Message</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+            <?php endif; ?>
+            <?php if (!empty($error_message)): ?>
+            <div class="themed-alert alert-err">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <?= htmlspecialchars($error_message) ?>
             </div>
-            
-            <!--User Information-->
-            <div class="col-md-6">
-                <div class="card shadow mb-4">
-                    <div class="card-header bg-secondary text-white">
-                        <h4 class="mb-0">User Information</h4>
-                    </div>
-                    <div class="card-body">
-                        <p><strong>Username:</strong> <?php echo htmlspecialchars($_SESSION['user']['username']); ?></p>
-                        <?php if(isset($_SESSION['user']['email'])): ?>
-                            <p><strong>Email:</strong> <?php echo htmlspecialchars($_SESSION['user']['email']); ?></p>
-                        <?php endif; ?>
-                        <p><strong>Account Type:</strong> <?php echo ucfirst($_SESSION['user']['role']); ?></p>
-                        <p class="mb-0 text-muted">This information will be included with your message to help administrators identify you.</p>
-                    </div>
-                </div>
-                
-                <div class="card shadow">
-                    <div class="card-header bg-info text-white">
-                        <h4 class="mb-0">Contact Options</h4>
-                    </div>
-                    <div class="card-body">
-                        <p><i class="bi bi-envelope-fill me-2"></i> Email: <a href="mailto:support@optimaflow.com">support@optimaflow.com</a></p>
-                        <p><i class="bi bi-telephone-fill me-2"></i> Phone: +63 912 345 6789</p>
-                        <p class="mb-0"><i class="bi bi-clock-fill me-2"></i> Response Time: Within 24-48 hours</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!--Previous Messages Section-->
-        <div class="message-list">
-            <h2 class="mb-4">Your Previous Messages</h2>
-            
-            <?php if(empty($previousMessages)): ?>
-                <div class="alert alert-info">
-                    You haven't sent any messages yet.
-                </div>
-            <?php else: ?>
-                <?php foreach($previousMessages as $msg): ?>
-                    <div class="card message-card <?php echo $msg['is_read'] ? 'message-read' : ''; ?>">
-                        <div class="card-body">
-                            <div class="message-header mb-2">
-                                <span>Sent on: <?php echo date('F d, Y - h:i A', strtotime($msg['created_at'])); ?></span>
-                                <span class="read-status <?php echo $msg['is_read'] ? 'status-read' : 'status-unread'; ?>">
-                                    <?php echo $msg['is_read'] ? 'Read' : 'Unread'; ?>
-                                </span>
-                            </div>
-                            <h5 class="card-title"><?php echo htmlspecialchars($msg['subject']); ?></h5>
-                            <p class="card-text"><?php echo nl2br(htmlspecialchars($msg['content'])); ?></p>
+            <?php endif; ?>
+
+            <!-- FORM + INFO -->
+            <div class="row g-4 mb-4">
+
+                <!-- Message Form -->
+                <div class="col-md-6">
+                    <div class="themed-card">
+                        <div class="card-head mid-head">
+                            <div class="card-head-icon"><i class="bi bi-pencil-square"></i></div>
+                            <h4 class="card-head-title">Send New Message</h4>
+                        </div>
+                        <div class="card-body-pad">
+                            <form action="<?= htmlspecialchars($_SERVER["PHP_SELF"]) ?>" method="post">
+                                <div class="form-group">
+                                    <label class="form-lbl" for="subject">Subject</label>
+                                    <input type="text" class="form-inp" id="subject" name="subject" placeholder="What is this regarding?" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-lbl" for="message">Message</label>
+                                    <textarea class="form-inp" id="message" name="message" rows="6" placeholder="Write your message here..." required></textarea>
+                                </div>
+                                <button type="submit" name="submit_message" class="btn-send">
+                                    <i class="bi bi-send-fill"></i> Send Message
+                                </button>
+                            </form>
                         </div>
                     </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+                </div>
+
+                <!-- Right Column -->
+                <div class="col-md-6 d-flex flex-column gap-4">
+
+                    <!-- User Info -->
+                    <div class="themed-card">
+                        <div class="card-head">
+                            <div class="card-head-icon"><i class="bi bi-person-circle"></i></div>
+                            <h4 class="card-head-title">Your Information</h4>
+                        </div>
+                        <div class="card-body-pad">
+                            <div class="info-row">
+                                <span class="info-label">Username</span>
+                                <span><?= htmlspecialchars($_SESSION['user']['username']) ?></span>
+                            </div>
+                            <?php if (isset($_SESSION['user']['email'])): ?>
+                            <div class="info-row">
+                                <span class="info-label">Email</span>
+                                <span><?= htmlspecialchars($_SESSION['user']['email']) ?></span>
+                            </div>
+                            <?php endif; ?>
+                            <div class="info-row">
+                                <span class="info-label">Account Type</span>
+                                <span><?= ucfirst($_SESSION['user']['role']) ?></span>
+                            </div>
+                            <p class="info-note">This information will be included with your message to help administrators identify you.</p>
+                        </div>
+                    </div>
+
+                    <!-- Contact Options -->
+                    <div class="themed-card">
+                        <div class="card-head gold-head">
+                            <div class="card-head-icon"><i class="bi bi-telephone"></i></div>
+                            <h4 class="card-head-title">Contact Options</h4>
+                        </div>
+                        <div class="card-body-pad">
+                            <div class="contact-item">
+                                <div class="contact-icon"><i class="bi bi-envelope-fill"></i></div>
+                                <div>Email: <a href="mailto:support@optimaflow.com">support@optimaflow.com</a></div>
+                            </div>
+                            <div class="contact-item">
+                                <div class="contact-icon"><i class="bi bi-telephone-fill"></i></div>
+                                <div>Phone: +63 912 345 6789</div>
+                            </div>
+                            <div class="contact-item">
+                                <div class="contact-icon"><i class="bi bi-clock-fill"></i></div>
+                                <div>Response time: Within 24–48 hours</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- MESSAGE HISTORY -->
+            <div class="mb-2 mt-3">
+                <h2 class="section-heading">Previous Messages</h2>
+            </div>
+            <div style="margin-top: 1.6rem;">
+                <?php if (empty($previousMessages)): ?>
+                <div class="empty-msg">
+                    <i class="bi bi-inbox" style="font-size:2rem; display:block; margin-bottom:0.6rem; opacity:0.3;"></i>
+                    You haven't sent any messages yet.
+                </div>
+                <?php else: ?>
+                    <?php foreach ($previousMessages as $msg): ?>
+                    <div class="msg-card <?= $msg['is_read'] ? 'msg-read' : '' ?>">
+                        <div class="msg-meta">
+                            <span><i class="bi bi-clock me-1"></i><?= date('F d, Y — h:i A', strtotime($msg['created_at'])) ?></span>
+                            <span class="status-pill <?= $msg['is_read'] ? 'status-read' : 'status-unread' ?>">
+                                <?= $msg['is_read'] ? 'Read' : 'Unread' ?>
+                            </span>
+                        </div>
+                        <p class="msg-subject"><?= htmlspecialchars($msg['subject']) ?></p>
+                        <p class="msg-body"><?= nl2br(htmlspecialchars($msg['content'])) ?></p>
+                    </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+
         </div>
     </div>
 
-    <!--Footer-->
-    <footer class="bg-dark text-white py-4">
-        <div class="container text-center">
-            <p>&copy; 2025 OptimaFlow. All rights reserved.</p>
+    <!-- FOOTER -->
+    <footer>
+        <div class="container">
+            <p class="mb-1">&copy; 2025 <strong>Bicol Depot</strong>. All rights reserved.</p>
             <p>
-                <a href="privacy.html" class="text-white">Privacy Policy</a> |
-                <a href="terms.html" class="text-white">Terms of Service</a>
+                <a href="privacy.html">Privacy Policy</a>
+                <span class="mx-2" style="opacity:0.3;">|</span>
+                <a href="terms.html">Terms of Service</a>
             </p>
         </div>
     </footer>
 
-    <!--Bootstrap JS-->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
 <?php $conn->close(); ?>

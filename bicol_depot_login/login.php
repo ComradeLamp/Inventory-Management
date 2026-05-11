@@ -11,7 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (empty($email) || empty($password)) {
         $error_message = "Email and password are required";
     } else {
-        //Check if user exists & verify status
         $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
@@ -20,35 +19,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         if ($result->num_rows == 1) {
             $user = $result->fetch_assoc();
             
-            //Check if account is active
             if (isset($user['status']) && $user['status'] !== 'active') {
                 $error_message = "Your account has been deactivated. Please contact the administrator.";
-            }
-            //Verify password if account is active or not
-            elseif (password_verify($password, $user['password'])) {
-                //Set session variables with only necessary data
+            } elseif (password_verify($password, $user['password'])) {
                 $_SESSION['user'] = [
                     'id' => $user['id'],
                     'email' => $user['email'],
                     'username' => $user['username'],
                     'role' => $user['role']
                 ];
-                
-                //Set a flag indicating this is a new login
                 $_SESSION['just_logged_in'] = true;
 
-                //Update login_at field with the current timestamp
                 $updateLoginTime = "UPDATE users SET login_at = NOW() WHERE id = ?";
                 $updateStmt = $conn->prepare($updateLoginTime);
                 $updateStmt->bind_param("i", $user['id']);
                 $updateStmt->execute();
                 $updateStmt->close();
                 
-                //Redirect user based on role
                 if ($user['role'] === 'admin') {
-                    header("Location: dashboard_admin.php"); //Manager
+                    header("Location: dashboard_admin.php");
                 } else {
-                    header("Location: dashboard_customer.php"); //Customer
+                    header("Location: dashboard_customer.php");
                 }
                 exit();
             } else {
@@ -62,7 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 $conn->close();
 
-//Check if coming from password reset page or not
 $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
 ?>
 
@@ -72,102 +62,156 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Bicol Depot</title>
-    <!--Bootstrap CSS-->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Login - Optima Flow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         :root {
-            --primary-blue: #1a4b84;
-            --secondary-blue: #2563eb;
-            --dark-blue: #0f2d4e;
+            --blue:    #2B5EAB;
+            --blue-dk: #1A3F7A;
+            --gold:    #C9A84C;
+            --beige:   #F5F0DC;
+            --dark:    #0E1F3D;
+            --mid:     #2C3A5E;
+            --muted:   #6B7A99;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            line-height: 1.5;
+            font-family: 'DM Sans', sans-serif;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0;
+            background: var(--beige);
+            position: relative;
+            overflow: hidden;
         }
 
-        .background {
-            background-image: url('assets/img/BGP.jpg');
-            background-size: cover;
-            background-position: center;
-            position: fixed; 
-            top: 0; left: 0; right: 0; bottom: 0;
-            z-index: -1; 
+        .geo-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        .login-container {
-            background: rgb(255, 255, 255);
+        /* ── CARD ── */
+        .login-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 420px;
+            margin: 2rem 1.2rem;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(43,94,171,0.12);
             border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-            padding: 2.5rem;
-            max-width: 450px;
-            width: 120%;
-            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(14,31,61,0.1), 0 4px 16px rgba(14,31,61,0.06);
+            padding: 2.8rem 2.4rem 2.4rem;
+            animation: fadeUp 0.6s ease both;
         }
 
-        .logo-text {
-            color: var(--primary-blue);
+        /* ── HEADER ── */
+        .card-header {
             text-align: center;
+            margin-bottom: 1.8rem;
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
             font-size: 2rem;
-            font-weight: 700;
-            margin: 0;
+            font-weight: 900;
+            color: var(--dark);
+            letter-spacing: -0.02em;
+            display: block;
+            text-decoration: none;
+            margin-bottom: 0.3rem;
         }
 
-        .text-muted {
+        .brand span { color: var(--blue); }
+
+        .brand-underline {
+            display: block;
+            width: 40px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 2px;
+            margin: 0.5rem auto 0.75rem;
+            animation: growLine 0.5s 0.7s ease both;
+            transform: scaleX(0);
+            transform-origin: center;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            font-weight: 400;
+            color: var(--muted);
+            letter-spacing: 0.04em;
+        }
+
+        /* ── ALERTS ── */
+        .alert {
+            padding: 0.7rem 1rem;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            margin-bottom: 1.2rem;
             text-align: center;
         }
 
-        .form-control {
-            border: 2px solid #e2e8f0;
-            padding: 0.75rem 1rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+        .alert-danger {
+            background: rgba(192,57,43,0.08);
+            border: 1px solid rgba(192,57,43,0.2);
+            color: #922B21;
         }
 
-        .form-control:focus {
-            border-color: var(--secondary-blue);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .alert-success {
+            background: rgba(39,174,96,0.08);
+            border: 1px solid rgba(39,174,96,0.2);
+            color: #1E8449;
         }
 
-        .btn-primary {
-            background-color: var(--primary-blue);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        /* ── FORM ── */
+        .form-group {
+            margin-bottom: 1.1rem;
         }
 
-        .btn-primary:hover {
-            background-color: var(--dark-blue);
-            transform: translateY(-1px);
-        }
-
-        .links-container a {
-            color: var(--secondary-blue);
-            text-decoration: none;
+        .form-label {
+            display: block;
+            font-size: 0.78rem;
             font-weight: 500;
-            transition: color 0.3s ease;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--mid);
+            margin-bottom: 0.45rem;
         }
 
-        .links-container a:hover {
-            color: var(--dark-blue);
-        }
-
-        .alert {
+        .form-input {
+            width: 100%;
+            padding: 0.78rem 1rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            color: var(--dark);
+            background: rgba(245,240,220,0.5);
+            border: 1.5px solid rgba(43,94,171,0.18);
             border-radius: 8px;
-            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
-        /*Password input styles*/
-        .password-input {
+        .form-input:focus {
+            outline: none;
+            border-color: var(--blue);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(43,94,171,0.1);
+        }
+
+        .form-input::placeholder {
+            color: #aab2c8;
+            font-weight: 300;
+        }
+
+        /* ── PASSWORD TOGGLE ── */
+        .password-wrap {
             position: relative;
         }
 
@@ -180,86 +224,173 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
             right: 12px;
             top: 50%;
             transform: translateY(-50%);
-            color: #6b7280;
-            font-size: 1.1rem;
+            background: none;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--muted);
             cursor: pointer;
-            padding: 0.4rem 0.6rem;
-            border-radius: 4px;
-            transition: all 0.2s ease;
+            padding: 0.2rem 0.4rem;
+            letter-spacing: 0.04em;
+            transition: color 0.2s;
+        }
+
+        .toggle-password:hover { color: var(--blue); }
+
+        /* ── SUBMIT ── */
+        .submit-button {
+            width: 100%;
+            margin-top: 0.6rem;
+            padding: 0.9rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            color: white;
+            background: var(--blue);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(43,94,171,0.3);
+            transition: all 0.22s ease;
+        }
+
+        .submit-button:hover {
+            background: var(--blue-dk);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(43,94,171,0.4);
+        }
+
+        .submit-button:active { transform: scale(0.98); }
+
+        /* ── DIVIDER ── */
+        .divider {
+            border: none;
+            border-top: 1px solid rgba(43,94,171,0.1);
+            margin: 1.5rem 0 1.2rem;
+        }
+
+        /* ── FOOTER LINKS ── */
+        .footer-links {
             display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.82rem;
+            color: var(--muted);
         }
 
-        #togglePassword:hover {
-            color: var(--primary-blue);
-            background-color: rgba(26, 75, 132, 0.05);
-            transform: translateY(-50%) scale(1.1);
+        .footer-links a {
+            color: var(--blue);
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s;
         }
 
-        #togglePassword:active {
-            transform: translateY(-50%) scale(0.95);
+        .footer-links a:hover {
+            color: var(--blue-dk);
+            text-decoration: underline;
+        }
+
+        .footer-links .sep {
+            color: rgba(43,94,171,0.25);
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes growLine {
+            to { transform: scaleX(1); }
+        }
+
+        @media (max-width: 480px) {
+            .login-card { padding: 2rem 1.4rem; }
+            .brand { font-size: 1.7rem; }
         }
     </style>
 </head>
 
 <body>
-    <div class="background"></div>
-    <div class="container">
-        <div class="login-container">
-            <div class="logo-container">
-                <h1 class="logo-text">OptimaFlow</h1>
-                <p class="text-muted mb-4">Welcome back! Please login to your account.</p>
+
+    <div class="geo-bg">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="hex" x="0" y="0" width="60" height="52" patternUnits="userSpaceOnUse">
+                    <polygon points="30,2 58,17 58,47 30,62 2,47 2,17" fill="none" stroke="rgba(43,94,171,0.08)" stroke-width="1"/>
+                </pattern>
+                <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <circle cx="20" cy="20" r="1.4" fill="rgba(201,168,76,0.22)"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hex)"/>
+            <rect width="100%" height="100%" fill="url(#dots)"/>
+            <circle cx="82%" cy="14%" r="210" fill="none" stroke="rgba(43,94,171,0.06)" stroke-width="1.5"/>
+            <circle cx="82%" cy="14%" r="140" fill="none" stroke="rgba(43,94,171,0.05)" stroke-width="1"/>
+            <circle cx="12%" cy="86%" r="190" fill="none" stroke="rgba(201,168,76,0.1)" stroke-width="1.5"/>
+            <circle cx="12%" cy="86%" r="120" fill="none" stroke="rgba(201,168,76,0.07)" stroke-width="1"/>
+        </svg>
+    </div>
+
+    <div class="login-card">
+
+        <div class="card-header">
+            <a class="brand" href="index.php">Optima <span>Flow</span></a>
+            <span class="brand-underline"></span>
+            <p class="card-subtitle">Welcome back! Please sign in to continue</p>
+        </div>
+
+        <?php if (!empty($error_message)): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($error_message) ?></div>
+        <?php endif; ?>
+
+        <?php if ($resetSuccess): ?>
+            <div class="alert alert-success">Password reset successful! You can now log in.</div>
+        <?php endif; ?>
+
+        <form action="login.php" method="POST">
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
             </div>
 
-            <?php if (!empty($error_message)): ?>
-                <div class="alert alert-danger text-center"><?= htmlspecialchars($error_message) ?></div>
-            <?php endif; ?>
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <div class="password-wrap">
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required style="padding-right: 3.5rem;">
+                    <button type="button" class="toggle-password" onclick="togglePassword('password')" id="toggleBtn">Show</button>
+                </div>
+            </div>
 
-            <?php if ($resetSuccess): ?>
-                <div class="alert alert-success text-center">Password reset successful! You can now log in with your new password.</div>
-            <?php endif; ?>
+            <button type="submit" class="submit-button">Sign In →</button>
+        </form>
 
-            <form action="login.php" method="POST">
-                <div class="mb-4">
-                    <label for="email" class="form-label text-dark fw-medium">Email Address</label>
-                    <input type="email" class="form-control" id="email" name="email" required
-                        placeholder="Enter your email">
-                </div>
-                <div class="mb-4">
-                    <label for="password" class="form-label text-dark fw-medium">Password</label>
-                    <div class="password-input">
-                        <input type="password" class="form-control" id="password" name="password" required placeholder="Enter your password">
-                        <i class="fa-solid fa-eye-slash" id="togglePassword" title="Show password"></i>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary w-100 mb-4">Sign In</button>
-                <div class="links-container text-center">
-                    <a href="signup.php" class="me-3">Create Account</a>
-                    <span class="text-muted">|</span>
-                    <a href="forgot_password.php" class="ms-3">Forgot Password?</a>
-                </div>
-            </form>
+        <hr class="divider">
+
+        <div class="footer-links">
+            <a href="signup.php">Create Account</a>
+            <span class="sep">|</span>
+            <a href="forgot_password.php">Forgot Password?</a>
         </div>
+
     </div>
 
     <script>
-        const togglePassword = document.getElementById('togglePassword');
-        const passwordInput = document.getElementById('password');
-
-        togglePassword.addEventListener('click', function() {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                togglePassword.classList.remove('fa-eye-slash');
-                togglePassword.classList.add('fa-eye');
-                togglePassword.title = 'Hide password';
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const btn = document.getElementById('toggleBtn');
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = 'Hide';
             } else {
-                passwordInput.type = 'password';
-                togglePassword.classList.remove('fa-eye');
-                togglePassword.classList.add('fa-eye-slash');
-                togglePassword.title = 'Show password';
+                input.type = 'password';
+                btn.textContent = 'Show';
             }
-        });
+        }
     </script>
+
 </body>
 </html>
