@@ -29,7 +29,20 @@ body, html {
     color: var(--text);
 }
 
-.container { display: flex; min-height: 100vh; }
+/*Geometric Background*/
+.geo-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.container { 
+    display: flex; 
+    min-height: 100vh; 
+    position: relative; 
+    z-index: 1;
+}
 
 /* Sidebar - copy from existing admin pages, sticky */
 .sidebar {
@@ -50,6 +63,11 @@ body, html {
     font-weight: 700;
     padding: 0 8px;
     margin-bottom: 32px;
+    text-align: center;
+}
+
+.logo span {
+    color: var(--accent);
 }
 
 .nav { display: flex; flex-direction: column; gap: 4px; }
@@ -115,9 +133,10 @@ body, html {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 28px;
-    padding-bottom: 16px;
+    margin: -24px -32px 28px -32px;
+    padding: 24px 32px 16px 32px;
     border-bottom: 1px solid var(--border);
+    background-color: var(--bg);
 }
 
 .header h1 {

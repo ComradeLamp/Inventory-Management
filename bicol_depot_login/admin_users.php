@@ -91,9 +91,30 @@ $paginatedUsers = $stmt->get_result();
     <link rel="stylesheet" href="assets/css/admin/users.css"/>
 </head>
 <body>
+
+<div class="geo-bg">
+    <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <pattern id="hex" x="0" y="0" width="60" height="52" patternUnits="userSpaceOnUse">
+                <polygon points="30,2 58,17 58,47 30,62 2,47 2,17" fill="none" stroke="rgba(43,94,171,0.08)" stroke-width="1"/>
+            </pattern>
+            <pattern id="dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                <circle cx="20" cy="20" r="1.4" fill="rgba(201,168,76,0.22)"/>
+            </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#hex)"/>
+        <rect width="100%" height="100%" fill="url(#dots)"/>
+        <circle cx="82%" cy="14%" r="210" fill="none" stroke="rgba(43,94,171,0.06)" stroke-width="1.5"/>
+        <circle cx="82%" cy="14%" r="140" fill="none" stroke="rgba(43,94,171,0.05)" stroke-width="1"/>
+        <circle cx="12%" cy="86%" r="190" fill="none" stroke="rgba(201,168,76,0.1)" stroke-width="1.5"/>
+        <circle cx="12%" cy="86%" r="120" fill="none" stroke="rgba(201,168,76,0.07)" stroke-width="1"/>
+    </svg>
+</div>
+
+
     <div class="container">
         <aside class="sidebar">
-            <div class="logo">OptimaFlow Admin</div>
+            <div class="logo">Optima<span>Flow</span><br>Admin</div>
             <nav class="nav">
                 <a href="dashboard_admin.php" class="nav-item"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
                 <a href="admin_products.php" class="nav-item"><i class="fa-solid fa-box"></i> Products</a>
