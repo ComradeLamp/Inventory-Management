@@ -54,7 +54,7 @@ $categoryIcons = [
         }
 
         /* ── GEO BACKGROUND ── */
-        .geo-fixed {
+        .geo-fixed { 
             position: fixed;
             inset: 0;
             z-index: 0;
@@ -364,6 +364,72 @@ $categoryIcons = [
             position: relative;
             z-index: 1;
         }
+
+        /* ── FILTER BAR ── */
+        .filter-wrap {
+            position: relative;
+            z-index: 1;
+            margin: 0 auto 2rem;
+            max-width: 1100px;
+            background: rgba(255,255,255,0.78);
+            border: 1px solid rgba(43,94,171,0.12);
+            border-radius: 12px;
+            padding: 1rem;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .filter-label {
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--mid);
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+        }
+
+        .filter-select {
+            width: 100%;
+            border: 1.5px solid rgba(43,94,171,0.18);
+            border-radius: 8px;
+            background: rgba(245,240,220,0.55);
+            color: var(--dark);
+            padding: 0.58rem 0.75rem;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(43,94,171,0.1);
+            background: #fff;
+        }
+
+        .filter-reset {
+            width: 100%;
+            border: 1.5px solid rgba(43,94,171,0.3);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--blue);
+            font-size: 0.83rem;
+            font-weight: 600;
+            padding: 0.58rem 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .filter-reset:hover {
+            background: var(--blue);
+            color: #fff;
+        }
+
+        .empty-filter {
+            display: none;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9rem;
+            padding: 1.25rem 0;
+        }
     </style>
 </head>
 <body>
@@ -419,12 +485,39 @@ $categoryIcons = [
         <p>Quality pre-owned tech — laptops, parts & components</p>
     </div>
 
+    <div class="container">
+        <div class="filter-wrap">
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-md-5">
+                    <label class="filter-label" for="filterCategory">Category</label>
+                    <select id="filterCategory" class="filter-select">
+                        <option value="all">All Categories</option>
+                        <?php foreach ($orderedCategories as $category): ?>
+                            <option value="<?= htmlspecialchars(strtolower($category)) ?>"><?= htmlspecialchars($category) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="col-12 col-md-5">
+                    <label class="filter-label" for="filterPrice">Price</label>
+                    <select id="filterPrice" class="filter-select">
+                        <option value="default">Default Order</option>
+                        <option value="asc">Price: Lowest to Highest</option>
+                        <option value="desc">Price: Highest to Lowest</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-2">
+                    <button type="button" id="filterReset" class="filter-reset">Reset Filters</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- PRODUCTS -->
     <div class="main-content">
         <div class="container pb-5">
             <?php foreach ($orderedCategories as $category): ?>
                 <?php if (isset($allProducts[$category])): ?>
-                <div class="category-block">
+                <div class="category-block" data-category-block="<?= htmlspecialchars(strtolower($category)) ?>">
                     <div class="category-label">
                         <div class="cat-icon-badge">
                             <i class="bi <?= $categoryIcons[$category] ?? 'bi-box' ?>"></i>
@@ -440,7 +533,11 @@ $categoryIcons = [
                             $inStock = $product['quantity'] > 0;
                             $lowStock = $product['quantity'] > 0 && $product['quantity'] <= 3;
                         ?>
-                        <div class="col-sm-6 col-md-4 col-lg-3">
+                        <div class="col-sm-6 col-md-4 col-lg-3 product-item"
+                            data-category="<?= htmlspecialchars(strtolower($product['category'])) ?>"
+                            data-name="<?= htmlspecialchars(strtolower($product['name'])) ?>"
+                            data-description="<?= htmlspecialchars(strtolower($product['description'])) ?>"
+                            data-price="<?= htmlspecialchars($product['price']) ?>">
                             <div class="product-card">
                                 <div class="product-img">
                                     <img src="<?= htmlspecialchars($imagePath) ?>" alt="<?= htmlspecialchars($product['name']) ?>">
@@ -478,6 +575,9 @@ $categoryIcons = [
                 </div>
                 <?php endif; ?>
             <?php endforeach; ?>
+            <div id="emptyFilterState" class="empty-filter">
+                <i class="bi bi-search me-1"></i>No products found for your filters.
+            </div>
         </div>
     </div>
 
@@ -489,6 +589,68 @@ $categoryIcons = [
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const filterCategory = document.getElementById('filterCategory');
+        const filterPrice = document.getElementById('filterPrice');
+        const filterReset = document.getElementById('filterReset');
+        const productItems = Array.from(document.querySelectorAll('.product-item'));
+        const categoryBlocks = Array.from(document.querySelectorAll('[data-category-block]'));
+        const emptyFilterState = document.getElementById('emptyFilterState');
+
+        function productMatchesFilters(item) {
+            const category = filterCategory.value;
+
+            const itemCategory = item.dataset.category || '';
+            const categoryMatch = category === 'all' || itemCategory === category;
+
+            return categoryMatch;
+        }
+
+        function applyPriceSort() {
+            const sortOrder = filterPrice.value;
+            if (sortOrder === 'default') return;
+
+            categoryBlocks.forEach((block) => {
+                const row = block.querySelector('.row.g-4');
+                if (!row) return;
+
+                const items = Array.from(row.querySelectorAll('.product-item'));
+                items.sort((a, b) => {
+                    const priceA = parseFloat(a.dataset.price || '0');
+                    const priceB = parseFloat(b.dataset.price || '0');
+                    return sortOrder === 'asc' ? priceA - priceB : priceB - priceA;
+                });
+
+                items.forEach((item) => row.appendChild(item));
+            });
+        }
+
+        function applyFilters() {
+            productItems.forEach((item) => {
+                item.style.display = productMatchesFilters(item) ? '' : 'none';
+            });
+
+            applyPriceSort();
+
+            let visibleCount = 0;
+            categoryBlocks.forEach((block) => {
+                const hasVisibleItems = Array.from(block.querySelectorAll('.product-item')).some((item) => item.style.display !== 'none');
+                block.style.display = hasVisibleItems ? '' : 'none';
+                if (hasVisibleItems) visibleCount++;
+            });
+
+            emptyFilterState.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        filterCategory.addEventListener('change', applyFilters);
+        filterPrice.addEventListener('change', applyFilters);
+
+        filterReset.addEventListener('click', () => {
+            filterCategory.value = 'all';
+            filterPrice.value = 'default';
+            applyFilters();
+        });
+    </script>
 </body>
 </html>
 <?php $conn->close(); ?>
