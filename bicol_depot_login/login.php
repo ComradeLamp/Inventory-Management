@@ -215,11 +215,7 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
             position: relative;
         }
 
-        .password-input .form-control {
-            padding-right: 3.2rem;
-        }
-
-        #togglePassword {
+        .toggle-password {
             position: absolute;
             right: 12px;
             top: 50%;

@@ -53,10 +53,14 @@ html {
 .sidebar {
     width: 240px;
     background-color: var(--primary-dark);
-    color: #fff;
+    color: #FFFFFF;
     padding: 24px 16px;
     display: flex;
     flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
 }
 
 .logo {
@@ -463,6 +467,37 @@ html {
     background-color: var(--primary);
     color: #fff;
     border-color: var(--primary);
+}
+
+/*Filter Action Buttons*/
+.filter-actions {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.filter-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    flex: 1;
+    white-space: nowrap;
+}
+
+.btn-clear {
+    background-color: var(--gray-bg);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-clear:hover {
+    background-color: var(--danger-bg);
+    color: var(--danger);
+    border-color: var(--danger);
 }
 
 /*Pagination*/

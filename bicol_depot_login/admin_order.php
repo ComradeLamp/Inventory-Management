@@ -155,6 +155,7 @@ foreach ($statuses as $status) {
                 <a href="admin_products.php" class="nav-item"><i class="fa-solid fa-box"></i> Products</a>
                 <a href="admin_users.php" class="nav-item"><i class="fa-solid fa-users"></i> Users</a>
                 <a href="admin_order.php" class="nav-item active"><i class="fa-solid fa-clipboard-list"></i> Orders</a>
+                <a href="admin_analytics.php" class="nav-item"><i class="fa-solid fa-chart-line"></i> Analytics</a>
                 <form action="logout.php" method="post" class="logout-form">
                     <button type="submit"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </form>
@@ -240,8 +241,13 @@ foreach ($statuses as $status) {
                             <input type="text" class="filter-control" id="search" name="search"
                                 placeholder="Product name..." value="<?php echo htmlspecialchars($searchQuery); ?>">
                         </div>
-                        <div style="display: flex; align-items: flex-end;">
-                            <button type="submit" class="btn btn-primary" style="width: 100%;">Apply Filters</button>
+                        <div class="filter-actions">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa-solid fa-filter"></i> Apply Filters
+                            </button>
+                            <a href="admin_order.php" class="btn btn-clear" title="Clear filters">
+                                <i class="fa-solid fa-rotate"></i> Clear
+                            </a>
                         </div>
                     </div>
                 </form>

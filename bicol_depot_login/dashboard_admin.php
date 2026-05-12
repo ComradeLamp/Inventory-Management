@@ -48,6 +48,7 @@ $totalUsers = $totalUsersResult ? $totalUsersResult->fetch_assoc()['total'] : 0;
                 <a href="admin_products.php" class="nav-item"><i class="fa-solid fa-box"></i> Products</a>
                 <a href="admin_users.php" class="nav-item"><i class="fa-solid fa-users"></i> Users</a>
                 <a href="admin_order.php" class="nav-item"><i class="fa-solid fa-clipboard-list"></i> Orders</a>
+                <a href="admin_analytics.php" class="nav-item"><i class="fa-solid fa-chart-line"></i> Analytics</a>
                 <form action="logout.php" method="post" class="logout-form">
                     <button type="submit"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </form>
@@ -106,16 +107,10 @@ $totalUsers = $totalUsersResult ? $totalUsersResult->fetch_assoc()['total'] : 0;
                     <div class="action-description">Process pending orders</div>
                 </a>
 
-                <a href="#" class="action-card">
-                    <div class="action-icon"><i class="fa-solid fa-chart-line"></i></div>
-                    <div class="action-title">Sales Report</div>
-                    <div class="action-description">View sales analytics</div>
-                </a>
-
-                <a href="#" class="action-card">
-                    <div class="action-icon"><i class="fa-solid fa-gear"></i></div>
-                    <div class="action-title">Settings</div>
-                    <div class="action-description">Configure system settings</div>
+                <a href="admin_users.php" class="action-card">
+                    <div class="action-icon"><i class="fa-solid fa-users"></i></div>
+                    <div class="action-title">Manage Users</div>
+                    <div class="action-description">View and manage user accounts</div>
                 </a>
             </section>
 

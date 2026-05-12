@@ -99,6 +99,7 @@ $paginatedUsers = $stmt->get_result();
                 <a href="admin_products.php" class="nav-item"><i class="fa-solid fa-box"></i> Products</a>
                 <a href="admin_users.php" class="nav-item active"><i class="fa-solid fa-users"></i> Users</a>
                 <a href="admin_order.php" class="nav-item"><i class="fa-solid fa-clipboard-list"></i> Orders</a>
+                <a href="admin_analytics.php" class="nav-item"><i class="fa-solid fa-chart-line"></i> Analytics</a>
                 <form action="logout.php" method="post" class="logout-form">
                     <button type="submit"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
                 </form>
@@ -136,8 +137,11 @@ $paginatedUsers = $stmt->get_result();
                     <h2 class="users-title">All Users</h2>
                     <div class="users-search">
                         <div class="search-input-wrapper">
-                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <i class="fa-solid fa-magnifying-glass search-icon-left"></i>
                             <input type="text" id="user-search" class="search-input" placeholder="Search users...">
+                            <button type="button" id="clear-search" class="clear-search-btn" title="Clear search" style="display: none;">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
                         </div>
                         <button class="search-button">
                             <i class="fa-solid fa-magnifying-glass"></i> Search
