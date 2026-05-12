@@ -220,16 +220,24 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
             right: 12px;
             top: 50%;
             transform: translateY(-50%);
+            width: 2.15rem;
+            height: 2.15rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             background: none;
             border: none;
-            font-family: 'DM Sans', sans-serif;
-            font-size: 0.75rem;
-            font-weight: 500;
             color: var(--muted);
             cursor: pointer;
-            padding: 0.2rem 0.4rem;
-            letter-spacing: 0.04em;
+            padding: 0;
+            line-height: 0;
             transition: color 0.2s;
+        }
+
+        .toggle-password svg {
+            width: 20px;
+            height: 20px;
+            display: block;
         }
 
         .toggle-password:hover { color: var(--blue); }
@@ -250,6 +258,31 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
             cursor: pointer;
             box-shadow: 0 4px 18px rgba(43,94,171,0.3);
             transition: all 0.22s ease;
+        }
+
+        .submit-button.loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.92;
+            color: transparent;
+        }
+
+        .submit-button.loading::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-top: -0.625rem;
+            margin-left: -0.625rem;
+            border: 3px solid #F5F0DC;
+            border-top-color: #C9A84C;
+            border-right-color: #1A3F7A;
+            border-bottom-color: #C9A84C;
+            border-left-color: #F5F0DC;
+            border-radius: 50%;
+            animation: spin 1.35s linear infinite;
         }
 
         .submit-button:hover {
@@ -303,6 +336,10 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
             to { transform: scaleX(1); }
         }
 
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 480px) {
             .login-card { padding: 2rem 1.4rem; }
             .brand { font-size: 1.7rem; }
@@ -347,7 +384,7 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
             <div class="alert alert-success">Password reset successful! You can now log in.</div>
         <?php endif; ?>
 
-        <form action="login.php" method="POST">
+        <form action="login.php" method="POST" id="loginForm">
             <div class="form-group">
                 <label for="email" class="form-label">Email Address</label>
                 <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
@@ -357,11 +394,17 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
                 <label for="password" class="form-label">Password</label>
                 <div class="password-wrap">
                     <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required style="padding-right: 3.5rem;">
-                    <button type="button" class="toggle-password" onclick="togglePassword('password')" id="toggleBtn">Show</button>
+                    <button type="button" class="toggle-password" onclick="togglePassword('password', this)" id="toggleBtn" aria-label="Show password" title="Show password">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M2.062 12.348a1 1 0 0 1 0-.696A10.94 10.94 0 0 1 12 5c4.9 0 9.27 3 10.94 6.652a1 1 0 0 1 0 .696A10.94 10.94 0 0 1 12 19c-4.9 0-9.27-3-10.94-6.652Z"></path>
+                            <path d="M4 4l16 16"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </button>
                 </div>
             </div>
 
-            <button type="submit" class="submit-button">Sign In →</button>
+            <button type="submit" class="submit-button" id="loginSubmitBtn">Sign In →</button>
         </form>
 
         <hr class="divider">
@@ -375,17 +418,32 @@ $resetSuccess = isset($_GET['reset']) && $_GET['reset'] == 'success';
     </div>
 
     <script>
-        function togglePassword(inputId) {
+        const eyeIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 12s4-7.5 10.5-7.5S22.5 12 22.5 12 18.5 19.5 12 19.5 1.5 12 1.5 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+        const eyeOffIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696A10.94 10.94 0 0 1 12 5c4.9 0 9.27 3 10.94 6.652a1 1 0 0 1 0 .696A10.94 10.94 0 0 1 12 19c-4.9 0-9.27-3-10.94-6.652Z"></path><path d="M4 4l16 16"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+
+        function togglePassword(inputId, btn) {
             const input = document.getElementById(inputId);
-            const btn = document.getElementById('toggleBtn');
             if (input.type === 'password') {
                 input.type = 'text';
-                btn.textContent = 'Hide';
+                btn.innerHTML = eyeIcon;
+                btn.setAttribute('aria-label', 'Hide password');
+                btn.setAttribute('title', 'Hide password');
             } else {
                 input.type = 'password';
-                btn.textContent = 'Show';
+                btn.innerHTML = eyeOffIcon;
+                btn.setAttribute('aria-label', 'Show password');
+                btn.setAttribute('title', 'Show password');
             }
         }
+
+        const loginForm = document.getElementById('loginForm');
+        const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+
+        loginForm.addEventListener('submit', () => {
+            loginSubmitBtn.classList.add('loading');
+            loginSubmitBtn.textContent = 'Signing In...';
+            loginSubmitBtn.disabled = true;
+        });
     </script>
 
 </body>
