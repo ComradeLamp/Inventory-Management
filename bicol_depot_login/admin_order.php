@@ -12,21 +12,22 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
 $statusFilter = isset($_GET['status']) ? $_GET['status'] : '';
 $dateFilter = isset($_GET['date']) ? $_GET['date'] : '';
 $searchQuery = isset($_GET['search']) ? $_GET['search'] : '';
+$viewMode = isset($_GET['view']) && $_GET['view'] === 'deleted' ? 'deleted' : 'active';
 $page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $itemsPerPage = 10;
 $offset = ($page - 1) * $itemsPerPage;
 
-//Process reservation status update if form is submitted
+//Process actions: status update, soft delete, restore
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_id']) && isset($_POST['action'])) {
     $reservationId = $_POST['reservation_id'];
     $action = $_POST['action'];
 
     if ($action === 'update_status' && isset($_POST['status'])) {
         $newStatus = $_POST['status'];
-        $updateQuery = "UPDATE reservations SET status = ? WHERE id = ?";
+        //Only update if order is not deleted
+        $updateQuery = "UPDATE reservations SET status = ? WHERE id = ? AND deleted_at IS NULL";
         $stmt = $conn->prepare($updateQuery);
         $stmt->bind_param("si", $newStatus, $reservationId);
-
         if ($stmt->execute()) {
             $_SESSION['message'] = "Order #" . $reservationId . " status updated to " . ucfirst($newStatus);
         } else {
@@ -34,18 +35,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_id']) && 
         }
         $stmt->close();
     }
+    elseif ($action === 'soft_delete') {
+        $deleteQuery = "UPDATE reservations SET deleted_at = NOW() WHERE id = ? AND deleted_at IS NULL";
+        $stmt = $conn->prepare($deleteQuery);
+        $stmt->bind_param("i", $reservationId);
+        if ($stmt->execute()) {
+            $_SESSION['message'] = "Order #" . $reservationId . " has been deleted. You can restore it from the Deleted Orders view.";
+        } else {
+            $_SESSION['error'] = "Failed to delete order. Please try again.";
+        }
+        $stmt->close();
+    }
+    elseif ($action === 'restore') {
+        $restoreQuery = "UPDATE reservations SET deleted_at = NULL WHERE id = ? AND deleted_at IS NOT NULL";
+        $stmt = $conn->prepare($restoreQuery);
+        $stmt->bind_param("i", $reservationId);
+        if ($stmt->execute()) {
+            $_SESSION['message'] = "Order #" . $reservationId . " has been restored.";
+        } else {
+            $_SESSION['error'] = "Failed to restore order. Please try again.";
+        }
+        $stmt->close();
+    }
+
     header("Location: admin_order.php?" . http_build_query($_GET));
     exit();
 }
 
-//Modified query to remove user details that aren't in the table
-$query = "SELECT r.id, r.user_id, r.product_id, r.quantity, r.status, r.reserved_at, p.name as product_name, p.price 
+//Build base WHERE clause depending on view mode (active or deleted)
+$deletedClause = ($viewMode === 'deleted') ? "r.deleted_at IS NOT NULL" : "r.deleted_at IS NULL";
+
+$query = "SELECT r.id, r.user_id, r.product_id, r.quantity, r.status, r.reserved_at, r.deleted_at, p.name as product_name, p.price 
           FROM reservations r 
           JOIN products p ON r.product_id = p.id 
-          WHERE 1=1";
+          WHERE " . $deletedClause;
 $countQuery = "SELECT COUNT(*) as total FROM reservations r 
                JOIN products p ON r.product_id = p.id 
-               WHERE 1=1";
+               WHERE " . $deletedClause;
 $params = [];
 $types = "";
 
@@ -74,17 +100,13 @@ $params[] = $offset;
 $params[] = $itemsPerPage;
 $types .= "ii";
 
-//Prepare and execute count query
+//Count query
 $countStmt = $conn->prepare($countQuery);
 if (!empty($types) && !empty($params)) {
     $countTypes = substr($types, 0, -2);
     $countParams = array_slice($params, 0, -2);
     if (!empty($countTypes)) {
-        $countRef = [];
-        foreach ($countParams as $key => $value) {
-            $countRef[] = &$countParams[$key];
-        }
-        call_user_func_array([$countStmt, 'bind_param'], array_merge([$countTypes], $countRef));
+        $countStmt->bind_param($countTypes, ...$countParams);
     }
 }
 $countStmt->execute();
@@ -93,14 +115,10 @@ $totalRows = $countResult->fetch_assoc()['total'];
 $totalPages = ceil($totalRows / $itemsPerPage);
 $countStmt->close();
 
-//Prepare and execute main query
+//Main query
 $stmt = $conn->prepare($query);
 if (!empty($types) && !empty($params)) {
-    $paramRefs = [];
-    foreach ($params as $key => $value) {
-        $paramRefs[] = &$params[$key];
-    }
-    call_user_func_array([$stmt, 'bind_param'], array_merge([$types], $paramRefs));
+    $stmt->bind_param($types, ...$params);
 }
 $stmt->execute();
 $result = $stmt->get_result();
@@ -110,25 +128,42 @@ while ($row = $result->fetch_assoc()) {
 }
 $stmt->close();
 
-//Get reservation statuses for filter
-$statusesQuery = "SELECT DISTINCT status FROM reservations ORDER BY status";
+//Get reservation statuses for filter (only from active orders)
+$statusesQuery = "SELECT DISTINCT status FROM reservations WHERE deleted_at IS NULL ORDER BY status";
 $statusesResult = $conn->query($statusesQuery);
 $availableStatuses = [];
 while ($status = $statusesResult->fetch_assoc()) {
     $availableStatuses[] = $status['status'];
 }
 
-//Get stats for each status
+//Get stats for each status (only active orders)
 $statuses = ['pending', 'approved', 'fulfilled', 'cancelled'];
 $statusCounts = [];
 foreach ($statuses as $status) {
-    $statusCountQuery = "SELECT COUNT(*) as count FROM reservations WHERE status = ?";
+    $statusCountQuery = "SELECT COUNT(*) as count FROM reservations WHERE status = ? AND deleted_at IS NULL";
     $statusStmt = $conn->prepare($statusCountQuery);
     $statusStmt->bind_param("s", $status);
     $statusStmt->execute();
     $statusResult = $statusStmt->get_result();
     $statusCounts[$status] = $statusResult->fetch_assoc()['count'];
     $statusStmt->close();
+}
+
+//Get counts for view-mode toggle badges
+$activeCountResult = $conn->query("SELECT COUNT(*) as count FROM reservations WHERE deleted_at IS NULL");
+$activeOrdersCount = $activeCountResult->fetch_assoc()['count'];
+
+$deletedCountResult = $conn->query("SELECT COUNT(*) as count FROM reservations WHERE deleted_at IS NOT NULL");
+$deletedOrdersCount = $deletedCountResult->fetch_assoc()['count'];
+
+//Helper for building pagination URLs (preserves filters and view mode)
+function buildPageUrl($page, $statusFilter, $dateFilter, $searchQuery, $viewMode) {
+    $params = ['page' => $page];
+    if (!empty($statusFilter)) $params['status'] = $statusFilter;
+    if (!empty($dateFilter)) $params['date'] = $dateFilter;
+    if (!empty($searchQuery)) $params['search'] = $searchQuery;
+    if ($viewMode === 'deleted') $params['view'] = 'deleted';
+    return '?' . http_build_query($params);
 }
 ?>
 <!DOCTYPE html>
@@ -142,7 +177,7 @@ foreach ($statuses as $status) {
     <!--Font Icons-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 
-    <!--Users.css-->
+    <!--Orders.css-->
     <link rel="stylesheet" href="assets/css/admin/orders.css"/>
 </head>
 
@@ -215,10 +250,27 @@ foreach ($statuses as $status) {
 
             <!--Orders Container-->
             <div class="orders-container">
-                <h2>Customer Orders</h2>
+                <!--View Toggle: Active vs Deleted-->
+                <div class="view-toggle">
+                    <a href="admin_order.php" class="view-toggle-btn <?php echo $viewMode === 'active' ? 'active' : ''; ?>">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        Active Orders
+                        <span class="view-toggle-badge"><?php echo $activeOrdersCount; ?></span>
+                    </a>
+                    <a href="admin_order.php?view=deleted" class="view-toggle-btn <?php echo $viewMode === 'deleted' ? 'active' : ''; ?>">
+                        <i class="fa-solid fa-trash-can-arrow-up"></i>
+                        Deleted Orders
+                        <span class="view-toggle-badge"><?php echo $deletedOrdersCount; ?></span>
+                    </a>
+                </div>
+
+                <h2><?php echo $viewMode === 'deleted' ? 'Deleted Orders' : 'Customer Orders'; ?></h2>
 
                 <!--Filters-->
                 <form action="admin_order.php" method="GET">
+                    <?php if ($viewMode === 'deleted'): ?>
+                        <input type="hidden" name="view" value="deleted">
+                    <?php endif; ?>
                     <div class="filters">
                         <div>
                             <label for="status" class="form-label">Status</label>
@@ -245,7 +297,7 @@ foreach ($statuses as $status) {
                             <button type="submit" class="btn btn-primary">
                                 <i class="fa-solid fa-filter"></i> Apply Filters
                             </button>
-                            <a href="admin_order.php" class="btn btn-clear" title="Clear filters">
+                            <a href="admin_order.php<?php echo $viewMode === 'deleted' ? '?view=deleted' : ''; ?>" class="btn btn-clear" title="Clear filters">
                                 <i class="fa-solid fa-rotate"></i> Clear
                             </a>
                         </div>
@@ -254,9 +306,13 @@ foreach ($statuses as $status) {
 
                 <?php if (empty($orders)): ?>
                     <div class="empty-state">
-                        <i class="fa-solid fa-inbox empty-state-icon"></i>
-                        <h3 class="empty-state-message">No orders found</h3>
-                        <p class="empty-state-description">Try changing your filters or check back later</p>
+                        <i class="fa-solid <?php echo $viewMode === 'deleted' ? 'fa-trash-can' : 'fa-inbox'; ?> empty-state-icon"></i>
+                        <h3 class="empty-state-message">
+                            <?php echo $viewMode === 'deleted' ? 'No deleted orders' : 'No orders found'; ?>
+                        </h3>
+                        <p class="empty-state-description">
+                            <?php echo $viewMode === 'deleted' ? 'Deleted orders will appear here.' : 'Try changing your filters or check back later'; ?>
+                        </p>
                     </div>
                 <?php else: ?>
                     <!--Orders Table-->
@@ -269,6 +325,9 @@ foreach ($statuses as $status) {
                                     <th>Quantity</th>
                                     <th>Total Price</th>
                                     <th>Order Date</th>
+                                    <?php if ($viewMode === 'deleted'): ?>
+                                        <th>Deleted At</th>
+                                    <?php endif; ?>
                                     <th>Status</th>
                                     <th>Actions</th>
                                 </tr>
@@ -289,22 +348,47 @@ foreach ($statuses as $status) {
                                             </div>
                                         </td>
                                         <td><?php echo htmlspecialchars($order['quantity']); ?></td>
-                                        <td>₱<?php echo number_format($order['price'] * $order['quantity'], 2); ?></td>
+                                        <td>&#8369;<?php echo number_format($order['price'] * $order['quantity'], 2); ?></td>
                                         <td><?php echo date('M d, Y h:i A', strtotime($order['reserved_at'])); ?></td>
+                                        <?php if ($viewMode === 'deleted'): ?>
+                                            <td><?php echo date('M d, Y h:i A', strtotime($order['deleted_at'])); ?></td>
+                                        <?php endif; ?>
                                         <td>
                                             <span class="status-badge status-<?php echo htmlspecialchars($order['status']); ?>">
                                                 <?php echo ucfirst(htmlspecialchars($order['status'])); ?>
                                             </span>
                                         </td>
                                         <td>
-                                            <button class="update-status-btn"
-                                                data-id="<?php echo htmlspecialchars($order['id']); ?>"
-                                                data-product="<?php echo htmlspecialchars($order['product_name']); ?>"
-                                                data-quantity="<?php echo htmlspecialchars($order['quantity']); ?>"
-                                                data-price="₱<?php echo number_format($order['price'] * $order['quantity'], 2); ?>"
-                                                data-status="<?php echo htmlspecialchars($order['status']); ?>">
-                                                Update Status
-                                            </button>
+                                            <div class="action-buttons">
+                                                <?php if ($viewMode === 'active'): ?>
+                                                    <!--Active orders: Update Status + Delete-->
+                                                    <button class="update-status-btn"
+                                                        data-id="<?php echo htmlspecialchars($order['id']); ?>"
+                                                        data-product="<?php echo htmlspecialchars($order['product_name']); ?>"
+                                                        data-quantity="<?php echo htmlspecialchars($order['quantity']); ?>"
+                                                        data-price="&#8369;<?php echo number_format($order['price'] * $order['quantity'], 2); ?>"
+                                                        data-status="<?php echo htmlspecialchars($order['status']); ?>"
+                                                        title="Update status">
+                                                        <i class="fa-solid fa-pen-to-square"></i>
+                                                    </button>
+                                                    <form action="admin_order.php<?php echo !empty($_GET) ? '?' . http_build_query($_GET) : ''; ?>" method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this order? It can be restored later from the Deleted Orders view.');">
+                                                        <input type="hidden" name="reservation_id" value="<?php echo htmlspecialchars($order['id']); ?>">
+                                                        <input type="hidden" name="action" value="soft_delete">
+                                                        <button type="submit" class="delete-order-btn" title="Delete order">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                <?php else: ?>
+                                                    <!--Deleted orders: Restore-->
+                                                    <form action="admin_order.php?view=deleted" method="POST" class="inline-form" onsubmit="return confirm('Are you sure you want to restore this order?');">
+                                                        <input type="hidden" name="reservation_id" value="<?php echo htmlspecialchars($order['id']); ?>">
+                                                        <input type="hidden" name="action" value="restore">
+                                                        <button type="submit" class="restore-order-btn" title="Restore order">
+                                                            <i class="fa-solid fa-rotate-left"></i>
+                                                        </button>
+                                                    </form>
+                                                <?php endif; ?>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -315,15 +399,15 @@ foreach ($statuses as $status) {
                     <!--Pagination-->
                     <?php if ($totalPages > 1): ?>
                         <div class="pagination">
-                            <a href="?page=<?php echo $page - 1; ?>&status=<?php echo urlencode($statusFilter); ?>&date=<?php echo urlencode($dateFilter); ?>&search=<?php echo urlencode($searchQuery); ?>"
+                            <a href="<?php echo buildPageUrl($page - 1, $statusFilter, $dateFilter, $searchQuery, $viewMode); ?>"
                                 class="pagination-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
                                 <i class="fa-solid fa-chevron-left"></i>
                             </a>
                             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                                <a href="?page=<?php echo $i; ?>&status=<?php echo urlencode($statusFilter); ?>&date=<?php echo urlencode($dateFilter); ?>&search=<?php echo urlencode($searchQuery); ?>"
+                                <a href="<?php echo buildPageUrl($i, $statusFilter, $dateFilter, $searchQuery, $viewMode); ?>"
                                     class="pagination-item <?php echo $page == $i ? 'active' : ''; ?>"><?php echo $i; ?></a>
                             <?php endfor; ?>
-                            <a href="?page=<?php echo $page + 1; ?>&status=<?php echo urlencode($statusFilter); ?>&date=<?php echo urlencode($dateFilter); ?>&search=<?php echo urlencode($searchQuery); ?>"
+                            <a href="<?php echo buildPageUrl($page + 1, $statusFilter, $dateFilter, $searchQuery, $viewMode); ?>"
                                 class="pagination-item <?php echo $page >= $totalPages ? 'disabled' : ''; ?>">
                                 <i class="fa-solid fa-chevron-right"></i>
                             </a>
@@ -332,7 +416,8 @@ foreach ($statuses as $status) {
                 <?php endif; ?>
             </div>
 
-            <!--Single Shared Status Modal-->
+            <!--Single Shared Status Modal (only used in active view)-->
+            <?php if ($viewMode === 'active'): ?>
             <div id="statusModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -340,7 +425,7 @@ foreach ($statuses as $status) {
                         <button type="button" class="close-modal" title="Close"><i
                                 class="fa-solid fa-xmark"></i></button>
                     </div>
-                    <form id="orderStatusForm" action="admin_order.php" method="POST">
+                    <form id="orderStatusForm" action="admin_order.php<?php echo !empty($_GET) ? '?' . http_build_query($_GET) : ''; ?>" method="POST">
                         <div class="modal-body">
                             <input type="hidden" name="reservation_id" value="">
                             <input type="hidden" name="action" value="update_status">
@@ -370,6 +455,7 @@ foreach ($statuses as $status) {
                     </form>
                 </div>
             </div>
+            <?php endif; ?>
         </main>
     </div>
 
