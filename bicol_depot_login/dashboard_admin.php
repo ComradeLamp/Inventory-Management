@@ -112,6 +112,12 @@ $totalUsers = $totalUsersResult ? $totalUsersResult->fetch_assoc()['total'] : 0;
                     <div class="action-title">Manage Users</div>
                     <div class="action-description">View and manage user accounts</div>
                 </a>
+
+                <a href="admin_analytics.php" class="action-card">
+                    <div class="action-icon"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="action-title">View Analytics</div>
+                    <div class="action-description">View charts and reports</div>
+                </a>
             </section>
 
             <!--Recent Activity-->
